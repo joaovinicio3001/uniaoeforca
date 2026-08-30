@@ -127,15 +127,22 @@ export async function registerAction(
   });
 
   if (error) {
-    const isDup =
-      error.message.toLowerCase().includes("already") ||
-      error.code === "user_already_exists";
+    const lower = error.message.toLowerCase();
+    const isDup = lower.includes("already") || error.code === "user_already_exists";
     if (isDup) {
       return { status: "error", message: DUP_MSG, duplicate: true, values };
     }
+    const emailFailed =
+      lower.includes("email") ||
+      lower.includes("smtp") ||
+      lower.includes("mail") ||
+      error.code === "unexpected_failure" ||
+      error.code === "email_provider_disabled";
     return {
       status: "error",
-      message: "Não foi possível concluir o cadastro. Tente novamente.",
+      message: emailFailed
+        ? "Não conseguimos enviar o e-mail de confirmação agora. Tente novamente em alguns minutos."
+        : "Não foi possível concluir o cadastro. Tente novamente.",
       values,
     };
   }
