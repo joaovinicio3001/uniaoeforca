@@ -52,12 +52,6 @@ export const registerSchema = z
       .transform((v) => onlyDigits(v))
       .refine((v) => v.length === 11, "CPF deve ter 11 dígitos.")
       .refine((v) => isValidCPF(v), "CPF inválido."),
-    birthDate: z.coerce
-      .date({ errorMap: () => ({ message: "Data de nascimento inválida." }) })
-      .refine((d) => {
-        const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
-        return age >= 18 && age <= 120;
-      }, "É necessário ter 18 anos ou mais."),
     email: z.string().trim().toLowerCase().email("E-mail inválido."),
     whatsapp: phoneSchema,
     password: passwordSchema,
@@ -79,6 +73,16 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Informe a senha."),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export const verifyOtpSchema = z.object({
+  email: z.string().trim().toLowerCase().email("E-mail inválido."),
+  token: z
+    .string()
+    .trim()
+    .transform((v) => onlyDigits(v))
+    .refine((v) => v.length === 6, "O código tem 6 dígitos."),
+});
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email("E-mail inválido."),

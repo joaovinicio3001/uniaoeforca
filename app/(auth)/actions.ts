@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { publicEnv } from "@/lib/env";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { publicEnv, hasServiceRole } from "@/lib/env";
 import { writeAuditLog } from "@/lib/security/audit";
 import { recordIpSignal } from "@/lib/risk/signals";
 import { hashCPF, cpfLast3 } from "@/lib/security/crypto";
@@ -14,7 +15,9 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  verifyOtpSchema,
 } from "@/lib/validation/auth";
+import type { Provider } from "@supabase/supabase-js";
 import type { FormState } from "@/app/(auth)/form-state";
 
 async function clientIp(): Promise<string> {
@@ -44,19 +47,28 @@ export async function registerAction(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  // Ecoado de volta ao formulário em qualquer erro, para não apagar o que a
+  // pessoa digitou. Senhas nunca voltam.
+  const values: Record<string, string> = {
+    fullName: String(formData.get("fullName") ?? ""),
+    cpf: String(formData.get("cpf") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    whatsapp: String(formData.get("whatsapp") ?? ""),
+  };
+
   const ip = await clientIp();
   const rl = rateLimit(`register:${ip}`, RATE_LIMITS.register);
   if (!rl.ok) {
     return {
       status: "error",
       message: `Muitas tentativas. Tente novamente em ${rl.retryAfterSeconds}s.`,
+      values,
     };
   }
 
   const parsed = registerSchema.safeParse({
     fullName: formData.get("fullName"),
     cpf: formData.get("cpf"),
-    birthDate: formData.get("birthDate"),
     email: formData.get("email"),
     whatsapp: formData.get("whatsapp"),
     password: formData.get("password"),
@@ -70,10 +82,31 @@ export async function registerAction(
       status: "error",
       message: "Revise os campos destacados.",
       fieldErrors: zodToFieldErrors(parsed.error),
+      values,
     };
   }
 
   const data = parsed.data;
+  const DUP_MSG =
+    "Você já tem uma conta com esses dados. Faça login ou use “Esqueci minha senha”.";
+
+  // Bloqueia CPF já cadastrado antes de criar o usuário no Auth.
+  if (hasServiceRole()) {
+    try {
+      const admin = createAdminClient();
+      const { data: existing } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("cpf_hash", hashCPF(data.cpf))
+        .maybeSingle();
+      if (existing) {
+        return { status: "error", message: DUP_MSG, duplicate: true, values };
+      }
+    } catch {
+      // Sem service role em runtime — segue e confia na constraint UNIQUE.
+    }
+  }
+
   const supabase = await createClient();
 
   const { data: signUp, error } = await supabase.auth.signUp({
@@ -86,7 +119,6 @@ export async function registerAction(
         display_name: data.fullName.split(/\s+/)[0],
         cpf_hash: hashCPF(data.cpf),
         cpf_last3: cpfLast3(data.cpf),
-        birth_date: data.birthDate.toISOString().slice(0, 10),
         phone: data.whatsapp,
         marketing_opt_in: data.marketingOptIn,
         terms_accepted: true,
@@ -95,13 +127,17 @@ export async function registerAction(
   });
 
   if (error) {
-    // Mensagens genéricas para não vazar existência de conta.
-    const msg =
+    const isDup =
       error.message.toLowerCase().includes("already") ||
-      error.code === "user_already_exists"
-        ? "Não foi possível concluir o cadastro com esses dados."
-        : "Não foi possível concluir o cadastro. Tente novamente.";
-    return { status: "error", message: msg };
+      error.code === "user_already_exists";
+    if (isDup) {
+      return { status: "error", message: DUP_MSG, duplicate: true, values };
+    }
+    return {
+      status: "error",
+      message: "Não foi possível concluir o cadastro. Tente novamente.",
+      values,
+    };
   }
 
   await writeAuditLog({
@@ -112,16 +148,116 @@ export async function registerAction(
     after: { email: data.email, marketing_opt_in: data.marketingOptIn },
   });
 
-  // Se a confirmação de e-mail estiver ativa, não há sessão ainda.
+  // Confirmação de e-mail ativa → sem sessão ainda. Vai para a tela de
+  // digitação do código de 6 dígitos.
   if (!signUp.session) {
-    return {
-      status: "check-email",
-      message:
-        "Cadastro recebido. Enviamos um link de confirmação para o seu e-mail.",
-    };
+    redirect(`/cadastro/confirmar?email=${encodeURIComponent(data.email)}`);
   }
 
   redirect("/painel");
+}
+
+// ------------------------------------------------------------------
+// Confirmação de e-mail por código de 6 dígitos (OTP)
+// ------------------------------------------------------------------
+export async function verifyEmailOtpAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const ip = await clientIp();
+  const rl = rateLimit(`verify-otp:${ip}`, RATE_LIMITS.login);
+  if (!rl.ok) {
+    return {
+      status: "error",
+      message: `Muitas tentativas. Tente novamente em ${rl.retryAfterSeconds}s.`,
+    };
+  }
+
+  const parsed = verifyOtpSchema.safeParse({
+    email: formData.get("email"),
+    token: formData.get("token"),
+  });
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Código inválido.",
+      fieldErrors: zodToFieldErrors(parsed.error),
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: parsed.data.email,
+    token: parsed.data.token,
+    type: "signup",
+  });
+
+  if (error || !data.user) {
+    return {
+      status: "error",
+      message: "Código incorreto ou expirado. Peça um novo e tente de novo.",
+    };
+  }
+
+  await writeAuditLog({
+    actorUserId: data.user.id,
+    action: "auth.email_confirmed",
+    entityType: "user",
+    entityId: data.user.id,
+  });
+  await recordIpSignal(data.user.id);
+
+  redirect("/painel");
+}
+
+export async function resendEmailOtpAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const ip = await clientIp();
+  const rl = rateLimit(`resend-otp:${ip}`, RATE_LIMITS.forgotPassword);
+  if (!rl.ok) {
+    return {
+      status: "error",
+      message: `Aguarde ${rl.retryAfterSeconds}s para pedir outro código.`,
+    };
+  }
+
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  if (!email.includes("@")) {
+    return { status: "error", message: "E-mail inválido." };
+  }
+
+  const supabase = await createClient();
+  await supabase.auth.resend({ type: "signup", email });
+
+  return { status: "success", message: "Enviamos um novo código para o seu e-mail." };
+}
+
+// ------------------------------------------------------------------
+// Login social (Google / X)
+// ------------------------------------------------------------------
+export async function oauthAction(formData: FormData): Promise<void> {
+  const provider = String(formData.get("provider") ?? "") as Provider;
+  if (provider !== "google" && provider !== "twitter") {
+    redirect("/login?erro=provedor-invalido");
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+    },
+  });
+
+  if (error || !data.url) {
+    redirect("/login?erro=oauth");
+  }
+
+  redirect(data.url);
 }
 
 // ------------------------------------------------------------------

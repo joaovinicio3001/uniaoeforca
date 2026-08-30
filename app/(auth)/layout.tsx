@@ -1,8 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
+import { redirect } from "next/navigation";
 
 import { Logo } from "@/components/brand/logo";
 import { getSessionUser } from "@/lib/auth/session";
-import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
   children,
@@ -14,28 +15,40 @@ export default async function AuthLayout({
   if (user) redirect("/painel");
 
   return (
-    <div className="grid min-h-dvh lg:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-brand-navy p-10 text-white lg:flex">
-        <Link href="/" className="text-white">
+    <div className="relative grid min-h-dvh bg-brand-surface lg:grid-cols-2">
+      {/* Painel com foto (desktop) */}
+      <div className="relative hidden lg:block">
+        <Image
+          src="/auth-bg.jpg"
+          alt=""
+          fill
+          priority
+          sizes="50vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-brand-navy/10 to-brand-navy/30" />
+        <Link href="/" className="absolute left-8 top-8 text-white">
           <Logo variant="light" />
         </Link>
-        <div className="space-y-4">
-          <h1 className="text-3xl font-bold leading-tight">
-            Juntos fazemos a diferença.
-          </h1>
-          <p className="max-w-sm text-white/80">
-            Crie campanhas de arrecadação, receba doações por PIX e acompanhe
-            cada centavo com transparência e segurança.
-          </p>
-        </div>
-        <p className="text-xs text-white/60">
-          uniaoeforca.com.br
-        </p>
       </div>
 
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
+      {/* Fundo com foto (celular) */}
+      <div className="absolute inset-0 lg:hidden">
+        <Image
+          src="/auth-bg.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-brand-surface/90 backdrop-blur-sm" />
+      </div>
+
+      {/* Formulário */}
+      <div className="relative flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-sm">
+          <div className="mb-6 flex justify-center lg:hidden">
             <Link href="/">
               <Logo />
             </Link>

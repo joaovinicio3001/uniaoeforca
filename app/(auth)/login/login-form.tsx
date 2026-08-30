@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { OAuthButtons } from "@/components/forms/oauth-buttons";
 
 export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, initialFormState);
@@ -19,16 +20,28 @@ export function LoginForm() {
   const linkError = params.get("erro");
 
   return (
-    <form action={formAction} className="space-y-4" noValidate>
-      <input type="hidden" name="redirect" value={redirectTo} />
+    <div className="space-y-4">
+      <OAuthButtons label="entrar" />
 
-      {linkError === "link-invalido" && (
+      {(linkError === "oauth" || linkError === "provedor-invalido") && (
         <Alert variant="warning">
           <AlertDescription>
-            O link não é mais válido. Faça login ou solicite um novo.
+            Não foi possível entrar com esse provedor. Tente novamente ou use
+            e-mail e senha.
           </AlertDescription>
         </Alert>
       )}
+
+      <form action={formAction} className="space-y-4" noValidate>
+        <input type="hidden" name="redirect" value={redirectTo} />
+
+        {linkError === "link-invalido" && (
+          <Alert variant="warning">
+            <AlertDescription>
+              O link não é mais válido. Faça login ou solicite um novo.
+            </AlertDescription>
+          </Alert>
+        )}
 
       {state.status === "error" && state.message && (
         <Alert variant="destructive">
@@ -74,12 +87,16 @@ export function LoginForm() {
         Entrar
       </SubmitButton>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Ainda não tem conta?{" "}
-        <Link href="/cadastro" className="font-medium text-primary hover:underline">
-          Criar conta
-        </Link>
-      </p>
-    </form>
+        <p className="text-center text-sm text-muted-foreground">
+          Ainda não tem conta?{" "}
+          <Link
+            href="/cadastro"
+            className="font-medium text-primary hover:underline"
+          >
+            Criar conta
+          </Link>
+        </p>
+      </form>
+    </div>
   );
 }
