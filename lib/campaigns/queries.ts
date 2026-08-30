@@ -39,6 +39,7 @@ export async function listCategories(): Promise<CategoryRow[]> {
 export type PublicListParams = {
   q?: string;
   category?: string;
+  state?: string;
   sort?: "recent" | "progress" | "goal";
   page?: number;
   pageSize?: number;
@@ -65,6 +66,10 @@ export async function listPublicCampaigns(params: PublicListParams) {
       .eq("slug", params.category)
       .maybeSingle();
     if (cat) query = query.eq("category_id", cat.id);
+  }
+
+  if (params.state && params.state.trim()) {
+    query = query.eq("state", params.state.trim().toUpperCase());
   }
 
   if (params.q && params.q.trim()) {

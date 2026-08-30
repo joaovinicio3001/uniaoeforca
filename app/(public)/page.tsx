@@ -18,6 +18,7 @@ import {
   CampaignCard,
   type CampaignCardData,
 } from "@/components/campaigns/campaign-card";
+import { CampaignSearchBar } from "@/components/campaigns/search-bar";
 import { listCategories, listPublicCampaigns } from "@/lib/campaigns/queries";
 
 export const revalidate = 300;
@@ -102,9 +103,16 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Filtro de campanhas */}
+      <div className="relative z-10 bg-brand-surface">
+        <div className="container -mt-10 pb-4 md:-mt-12">
+          <CampaignSearchBar categories={categories} />
+        </div>
+      </div>
+
       {/* Segurança / confiança */}
       <section className="border-b bg-brand-surface">
-        <div className="container py-16">
+        <div className="container py-12">
           <div className="max-w-2xl">
             <h2 className="text-2xl font-bold">Você está segura aqui</h2>
             <p className="mt-2 text-muted-foreground">

@@ -17,9 +17,16 @@ export const metadata: Metadata = {
 type SP = {
   q?: string;
   categoria?: string;
+  estado?: string;
   ordem?: "recent" | "progress" | "goal";
   pagina?: string;
 };
+
+const UFS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
+  "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
+  "SP", "SE", "TO",
+];
 
 function pickCover(row: Record<string, unknown>): string | null {
   const m = row.campaign_media as { public_url?: string } | { public_url?: string }[] | null;
@@ -39,6 +46,7 @@ export default async function CampanhasPage({
     listPublicCampaigns({
       q: sp.q,
       category: sp.categoria,
+      state: sp.estado,
       sort: sp.ordem ?? "recent",
       page: Number(sp.pagina) || 1,
     }),
@@ -67,6 +75,7 @@ export default async function CampanhasPage({
     const merged = { ...sp, ...patch };
     if (merged.q) next.set("q", merged.q);
     if (merged.categoria) next.set("categoria", merged.categoria);
+    if (merged.estado) next.set("estado", merged.estado);
     if (merged.ordem && merged.ordem !== "recent") next.set("ordem", merged.ordem);
     if (merged.pagina && merged.pagina !== "1") next.set("pagina", merged.pagina);
     const qs = next.toString();
@@ -94,6 +103,18 @@ export default async function CampanhasPage({
           />
         </div>
         {sp.categoria && <input type="hidden" name="categoria" value={sp.categoria} />}
+        <select
+          name="estado"
+          defaultValue={sp.estado ?? ""}
+          className="h-10 rounded-md border border-input bg-card px-3 text-sm"
+        >
+          <option value="">Todo o Brasil</option>
+          {UFS.map((uf) => (
+            <option key={uf} value={uf}>
+              {uf}
+            </option>
+          ))}
+        </select>
         <select
           name="ordem"
           defaultValue={sp.ordem ?? "recent"}
