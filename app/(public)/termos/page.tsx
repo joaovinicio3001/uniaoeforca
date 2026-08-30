@@ -37,16 +37,16 @@ export default function TermosPage() {
       <p>
         Campanhas passam por moderação. É proibido usar a plataforma para fins
         ilícitos, enganosos, difamatórios, que violem direitos de terceiros ou as{" "}
-        <a href="/politica-campanhas">Regras de Campanhas</a>. Podemos pausar,
+        <a href="/regras-e-seguranca">Regras e segurança</a>. Podemos pausar,
         bloquear ou remover campanhas e reter valores em caso de suspeita de
         fraude ou ordem legal.
       </p>
 
-      <h2>4. Taxas</h2>
+      <h2>4. Custos</h2>
       <p>
-        As taxas vigentes estão em <a href="/taxas">/taxas</a> e são registradas
-        em cada doação no momento da transação. Mudanças de taxa não afetam
-        pagamentos já realizados.
+        Os custos vigentes estão em <a href="/custos">/custos</a> e são
+        registrados em cada doação no momento da transação. Mudanças de taxa não
+        afetam pagamentos já realizados.
       </p>
 
       <h2>5. Saques</h2>

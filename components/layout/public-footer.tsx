@@ -16,16 +16,15 @@ export function PublicFooter() {
           title="Plataforma"
           links={[
             ["Campanhas", "/campanhas"],
-            ["Como funciona", "/como-funciona"],
-            ["Taxas", "/taxas"],
+            ["Como criar uma campanha", "/como-funciona"],
+            ["Custos", "/custos"],
           ]}
         />
         <FooterCol
           title="Confiança"
           links={[
-            ["Segurança", "/seguranca"],
+            ["Regras e segurança", "/regras-e-seguranca"],
             ["Central de ajuda", "/ajuda"],
-            ["Regras de campanhas", "/politica-campanhas"],
           ]}
         />
         <FooterCol

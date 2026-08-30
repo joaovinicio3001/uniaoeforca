@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, Search } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -11,17 +11,14 @@ type MenuLink = { label: string; href: string; desc?: string };
 const COMO_AJUDAR: MenuLink[] = [
   { label: "Encontrar uma campanha", href: "/campanhas", desc: "Explore causas ativas e apoie quem precisa" },
   { label: "Como doar", href: "/como-funciona", desc: "Passo a passo para contribuir por PIX" },
-  { label: "Segurança para quem doa", href: "/seguranca", desc: "Como protegemos a sua doação" },
+  { label: "Regras e segurança", href: "/regras-e-seguranca", desc: "Como protegemos a sua doação" },
   { label: "Central de ajuda", href: "/ajuda", desc: "Perguntas frequentes e contato" },
 ];
 
 const COMO_FUNCIONA: MenuLink[] = [
-  { label: "Criar uma campanha", href: "/como-funciona", desc: "Do cadastro ao primeiro saque" },
-  { label: "Taxas", href: "/taxas", desc: "Quanto custa — grátis para criar" },
-  { label: "Regras de campanhas", href: "/politica-campanhas", desc: "O que é permitido na plataforma" },
-  { label: "Segurança e antifraude", href: "/seguranca", desc: "Verificação, monitoramento e proteção" },
-  { label: "Termos de Uso", href: "/termos" },
-  { label: "Política de Privacidade", href: "/privacidade" },
+  { label: "Como criar uma campanha", href: "/como-funciona", desc: "Passo a passo completo, do rascunho ao saque" },
+  { label: "Custos", href: "/custos", desc: "Tudo o que você paga — e o que é grátis" },
+  { label: "Regras e segurança", href: "/regras-e-seguranca", desc: "O que é permitido e como protegemos todo mundo" },
 ];
 
 export async function PublicHeader() {
@@ -39,6 +36,12 @@ export async function PublicHeader() {
     })),
   ];
 
+  const groups: { title: string; items: MenuLink[] }[] = [
+    { title: "Como ajudar", items: COMO_AJUDAR },
+    { title: "Descubra", items: descubra },
+    { title: "Como funciona", items: COMO_FUNCIONA },
+  ];
+
   return (
     <header className="sticky top-0 z-40 border-b bg-card">
       <div className="container flex h-16 items-center justify-between gap-4">
@@ -46,13 +49,14 @@ export async function PublicHeader() {
           <Logo />
         </Link>
 
+        {/* Desktop */}
         <nav className="hidden items-center gap-1 md:flex">
-          <Dropdown label="Como ajudar" items={COMO_AJUDAR} />
-          <Dropdown label="Descubra" items={descubra} />
-          <Dropdown label="Como funciona" items={COMO_FUNCIONA} />
+          {groups.map((g) => (
+            <Dropdown key={g.title} label={g.title} items={g.items} />
+          ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <Button asChild size="sm">
               <Link href="/painel">Meu painel</Link>
@@ -68,26 +72,67 @@ export async function PublicHeader() {
             </>
           )}
         </div>
-      </div>
 
-      {/* Navegação em telas pequenas */}
-      <details className="border-t md:hidden">
-        <summary className="container flex cursor-pointer list-none items-center justify-between py-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
-          Menu
-          <ChevronDown className="size-4" />
-        </summary>
-        <div className="container grid gap-1 pb-4 text-sm">
-          {[...COMO_AJUDAR, ...descubra.slice(0, 2), ...COMO_FUNCIONA].map((l) => (
-            <Link
-              key={l.label + l.href}
-              href={l.href}
-              className="rounded-md px-2 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+        {/* Mobile */}
+        <div className="flex items-center gap-1 md:hidden">
+          <Link
+            href="/buscar"
+            aria-label="Buscar campanhas"
+            className="rounded-md p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+          >
+            <Search className="size-5" />
+          </Link>
+          <details className="group">
+            <summary
+              aria-label="Abrir menu"
+              className="flex list-none cursor-pointer rounded-md p-2 text-muted-foreground hover:bg-secondary hover:text-foreground [&::-webkit-details-marker]:hidden"
             >
-              {l.label}
-            </Link>
-          ))}
+              <Menu className="size-5" />
+            </summary>
+            <div className="fixed inset-x-0 top-16 z-50 border-t bg-card shadow-lg">
+              <div className="container max-h-[calc(100dvh-4rem)] overflow-y-auto py-4">
+                {groups.map((g) => (
+                  <div key={g.title} className="border-b py-3 first:pt-0 last:border-b-0">
+                    <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {g.title}
+                    </p>
+                    {g.items.map((it) => (
+                      <Link
+                        key={it.label + it.href}
+                        href={it.href}
+                        className="block rounded-lg px-1 py-2 hover:bg-secondary"
+                      >
+                        <span className="block text-sm font-medium">{it.label}</span>
+                        {it.desc && (
+                          <span className="block text-xs text-muted-foreground">
+                            {it.desc}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+                <div className="flex flex-col gap-2 pt-4">
+                  {user ? (
+                    <Button asChild>
+                      <Link href="/painel">Meu painel</Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button asChild variant="outline">
+                        <Link href="/login">Entrar</Link>
+                      </Button>
+                      <Button asChild>
+                        <Link href="/cadastro">Criar conta</Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
-      </details>
+      </div>
     </header>
   );
 }
