@@ -98,9 +98,6 @@ export default async function HomePage() {
                 <Link href="/campanhas">Quero ajudar</Link>
               </Button>
             </div>
-            <p className="text-sm text-white/70">
-              Criar é grátis · Doações por PIX · Repasse para a sua conta
-            </p>
           </div>
         </div>
       </section>
