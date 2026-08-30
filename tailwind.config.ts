@@ -2,8 +2,8 @@ import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
 /**
- * Paleta oficial União & Força (doc §32):
- *   azul-marinho #06356B · verde #05B76B · amarelo #FDBD22 · branco #FFFFFF · fundo #F6F8FA
+ * Paleta União & Força:
+ *   Baleia Azul #042f50 · Azul da Ciência #0459d4 · Verde Floresta #20af3d · Dicas de Ouro #e3c518
  * Tokens expostos como CSS vars em app/globals.css para suportar tema claro/escuro.
  */
 const config: Config = {
@@ -27,9 +27,10 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         brand: {
-          navy: "#06356B",
-          green: "#05B76B",
-          yellow: "#FDBD22",
+          navy: "#042f50",
+          blue: "#0459d4",
+          green: "#20af3d",
+          yellow: "#e3c518",
           surface: "#F6F8FA",
         },
         primary: {

@@ -42,10 +42,10 @@ const serverSchema = z.object({
   PUSHINPAY_WEBHOOK_SECRET: z.string().optional().default(""),
   // Vazio → escolhe sandbox/produção por NODE_ENV.
   PUSHINPAY_BASE_URL: z.string().optional().default(""),
-  // Custo estimado do provedor por transação (doc §9): reconciliado depois com o
-  // custo real. Default: 3% com mínimo de R$ 0,77.
-  PUSHINPAY_FEE_BPS: z.coerce.number().int().min(0).max(10000).optional().default(300),
-  PUSHINPAY_FEE_MIN_CENTS: z.coerce.number().int().min(0).optional().default(77),
+  // Custo do provedor de PIX In (Pushin Pay) por transação (doc §9): tarifa fixa
+  // de R$ 0,35, sem percentual. Reconciliado depois com o extrato real.
+  PUSHINPAY_FEE_BPS: z.coerce.number().int().min(0).max(10000).optional().default(0),
+  PUSHINPAY_FEE_MIN_CENTS: z.coerce.number().int().min(0).optional().default(35),
   GGPIX_API_KEY: z.string().optional().default(""),
   GGPIX_WEBHOOK_SECRET: z.string().optional().default(""),
   // Vazio → https://ggpixapi.com/api/v1 (contingência: https://ggatepixapi.com/api/v1)

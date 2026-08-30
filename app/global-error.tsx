@@ -32,7 +32,7 @@ export default function GlobalError({
           alignItems: "center",
           justifyContent: "center",
           background: "#F6F8FA",
-          color: "#06356B",
+          color: "#042f50",
           textAlign: "center",
           padding: 24,
         }}
@@ -46,7 +46,7 @@ export default function GlobalError({
             onClick={reset}
             style={{
               marginTop: 16,
-              background: "#06356B",
+              background: "#042f50",
               color: "#fff",
               border: 0,
               borderRadius: 8,

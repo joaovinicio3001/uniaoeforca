@@ -19,9 +19,9 @@ export function Logo({
         role="img"
         aria-label="União & Força"
       >
-        <circle cx="12" cy="16" r="8" fill="none" stroke="#06356B" strokeWidth="3" />
-        <circle cx="20" cy="16" r="8" fill="none" stroke="#05B76B" strokeWidth="3" />
-        <circle cx="16" cy="16" r="2.5" fill="#FDBD22" />
+        <circle cx="12" cy="16" r="8" fill="none" stroke="#042f50" strokeWidth="3" />
+        <circle cx="20" cy="16" r="8" fill="none" stroke="#20af3d" strokeWidth="3" />
+        <circle cx="16" cy="16" r="2.5" fill="#e3c518" />
       </svg>
       {withText && (
         <span className="text-base font-bold tracking-tight text-foreground">

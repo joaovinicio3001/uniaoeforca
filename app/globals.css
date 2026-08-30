@@ -3,71 +3,71 @@
 @tailwind utilities;
 
 /**
- * Tokens de tema. Paleta oficial (doc §32):
- *   navy #06356B · green #05B76B · yellow #FDBD22 · white #FFFFFF · surface #F6F8FA
+ * Tokens de tema. Paleta União & Força:
+ *   Baleia Azul #042f50 · Azul da Ciência #0459d4 · Verde Floresta #20af3d · Dicas de Ouro #e3c518
  * Valores em HSL para o Tailwind (`hsl(var(--token))`).
  */
 @layer base {
   :root {
-    --background: 210 20% 97%;        /* #F6F8FA */
-    --foreground: 212 40% 12%;
+    --background: 208 33% 97%;
+    --foreground: 206 42% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 212 40% 12%;
+    --card-foreground: 206 42% 12%;
 
-    --primary: 211 89% 22%;          /* #06356B navy */
+    --primary: 206 90% 17%;         /* #042f50 Baleia Azul */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 16% 93%;
-    --secondary-foreground: 212 40% 16%;
+    --secondary: 210 30% 93%;
+    --secondary-foreground: 206 42% 16%;
 
-    --success: 152 94% 37%;          /* #05B76B green */
+    --success: 132 64% 41%;         /* #20af3d Verde Floresta */
     --success-foreground: 0 0% 100%;
 
-    --accent: 44 98% 56%;            /* #FDBD22 yellow */
-    --accent-foreground: 212 45% 14%;
+    --accent: 51 84% 49%;           /* #e3c518 Dicas de Ouro */
+    --accent-foreground: 206 55% 13%;
 
-    --muted: 210 16% 93%;
-    --muted-foreground: 213 12% 42%;
+    --muted: 210 28% 93%;
+    --muted-foreground: 208 14% 40%;
 
     --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 86%;
-    --ring: 211 89% 30%;
+    --border: 210 24% 87%;
+    --input: 210 24% 85%;
+    --ring: 216 95% 42%;            /* #0459d4 Azul da Ciência */
 
     --radius: 0.7rem;
   }
 
   .dark {
-    --background: 213 44% 8%;
+    --background: 206 44% 8%;
     --foreground: 210 20% 96%;
 
-    --card: 213 40% 11%;
+    --card: 206 40% 11%;
     --card-foreground: 210 20% 96%;
 
-    --primary: 210 90% 66%;
-    --primary-foreground: 213 44% 8%;
+    --primary: 214 92% 66%;         /* Azul da Ciência clareado p/ fundo escuro */
+    --primary-foreground: 206 44% 8%;
 
-    --secondary: 213 30% 18%;
+    --secondary: 206 30% 18%;
     --secondary-foreground: 210 20% 96%;
 
-    --success: 152 74% 44%;
-    --success-foreground: 213 44% 8%;
+    --success: 132 58% 48%;
+    --success-foreground: 206 44% 8%;
 
-    --accent: 44 90% 58%;
-    --accent-foreground: 213 44% 10%;
+    --accent: 51 82% 58%;
+    --accent-foreground: 206 44% 10%;
 
-    --muted: 213 28% 18%;
-    --muted-foreground: 214 14% 66%;
+    --muted: 206 28% 18%;
+    --muted-foreground: 210 14% 66%;
 
     --destructive: 0 64% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 213 26% 22%;
-    --input: 213 26% 24%;
-    --ring: 210 90% 60%;
+    --border: 206 26% 22%;
+    --input: 206 26% 24%;
+    --ring: 214 92% 62%;
   }
 }
 

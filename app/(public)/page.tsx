@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="border-b bg-gradient-to-b from-brand-navy to-[#04264d] text-white">
+      <section className="border-b bg-gradient-to-b from-brand-navy to-[#021f38] text-white">
         <div className="container grid gap-10 py-20 md:grid-cols-2 md:items-center">
           <div className="space-y-6">
             <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
