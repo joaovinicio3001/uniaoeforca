@@ -175,12 +175,12 @@ export default async function HomePage() {
       {/* Categorias */}
       {categories.length > 0 && (
         <section className="border-t bg-brand-surface">
-          <div className="container py-16">
+          <div className="container py-16 text-center">
             <h2 className="text-2xl font-bold">Para qualquer causa</h2>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
               Encontre uma campanha pela área que você quer apoiar.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mx-auto mt-6 flex max-w-3xl flex-wrap justify-center gap-3">
               {categories.map((cat) => (
                 <Link
                   key={cat.id}
@@ -196,29 +196,33 @@ export default async function HomePage() {
       )}
 
       {/* Como funciona */}
-      <section className="container py-16">
+      <section className="container py-16 text-center">
         <h2 className="text-2xl font-bold">Como funciona</h2>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
           Do primeiro clique ao dinheiro na sua conta.
         </p>
-        <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto mt-12 grid max-w-4xl gap-x-6 gap-y-10 sm:grid-cols-2">
           <Step
             n={1}
+            img="/how/criar.png"
             title="Crie sua campanha"
             text="Cadastre-se de graça, conte a sua história, defina a meta e adicione fotos."
           />
           <Step
             n={2}
+            img="/how/compartilhe.png"
             title="Compartilhe"
             text="Divulgue o link com amigos, familiares e nas redes sociais. Quanto mais gente vê, mais ajuda chega."
           />
           <Step
             n={3}
+            img="/how/receba.png"
             title="Receba por PIX"
             text="As doações entram automaticamente e você acompanha tudo em tempo real pelo painel."
           />
           <Step
             n={4}
+            img="/how/saque.png"
             title="Saque quando quiser"
             text="Peça o repasse do saldo para a sua chave PIX. Sem prazo mínimo de campanha."
           />
@@ -319,20 +323,29 @@ function Trust({
 
 function Step({
   n,
+  img,
   title,
   text,
 }: {
   n: number;
+  img: string;
   title: string;
   text: string;
 }) {
   return (
-    <div>
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+    <div className="relative rounded-2xl border bg-card p-5 pt-6 text-left">
+      <span className="absolute -top-4 left-5 flex h-9 w-9 items-center justify-center rounded-full bg-brand-navy text-sm font-bold text-white shadow">
         {n}
       </span>
-      <h3 className="mt-3 font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+      <div className="flex items-center gap-4">
+        <div className="relative h-28 w-28 shrink-0">
+          <Image src={img} alt="" fill sizes="112px" className="object-contain" />
+        </div>
+        <div>
+          <h3 className="font-bold">{title}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+        </div>
+      </div>
     </div>
   );
 }

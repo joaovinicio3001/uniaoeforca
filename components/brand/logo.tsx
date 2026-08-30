@@ -37,9 +37,9 @@ export function Logo({
     <Image
       src="/logo-lockup.png"
       alt="União &amp; Força"
-      width={1561}
-      height={667}
-      className={cn("h-9 w-auto", className)}
+      width={1716}
+      height={829}
+      className={cn("h-10 w-auto", className)}
       priority
     />
   );
