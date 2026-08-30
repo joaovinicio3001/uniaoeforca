@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShieldCheck,
   HandCoins,
@@ -15,16 +16,27 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="border-b bg-gradient-to-b from-brand-navy to-[#021f38] text-white">
-        <div className="container grid gap-10 py-20 md:grid-cols-2 md:items-center">
-          <div className="space-y-6">
-            <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
+      <section className="relative isolate overflow-hidden border-b bg-brand-navy text-white">
+        <Image
+          src="/hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/90 to-brand-navy/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-transparent to-transparent" />
+
+        <div className="container relative py-24 md:py-32">
+          <div className="max-w-xl space-y-6">
+            <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/20 backdrop-blur">
               Grátis para criar · Doações por PIX · Saque quando quiser
             </span>
-            <h1 className="text-4xl font-bold leading-tight md:text-5xl">
+            <h1 className="text-4xl font-bold leading-tight drop-shadow-sm md:text-5xl">
               Junte pessoas por uma causa.
             </h1>
-            <p className="max-w-md text-lg text-white/80">
+            <p className="max-w-md text-lg text-white/85">
               Crie uma campanha gratuita, receba doações por PIX e acompanhe cada
               contribuição em tempo real. Simples, rápido e seguro.
             </p>
@@ -36,38 +48,39 @@ export default function HomePage() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                className="border-white/40 bg-white/5 text-white backdrop-blur hover:bg-white/15 hover:text-white"
               >
                 <Link href="/campanhas">Ver campanhas</Link>
               </Button>
             </div>
           </div>
+        </div>
+      </section>
 
-          <Card className="bg-white/95">
-            <CardContent className="space-y-4 p-6 text-card-foreground">
-              <p className="text-sm font-semibold text-muted-foreground">
-                Como funciona
-              </p>
-              <ol className="space-y-3 text-sm">
-                <Step
-                  n={1}
-                  text="Crie sua campanha gratuitamente e conte a sua história."
-                />
-                <Step
-                  n={2}
-                  text="Compartilhe o link com amigos, familiares e nas redes sociais."
-                />
-                <Step
-                  n={3}
-                  text="Receba as doações por PIX e acompanhe tudo pelo painel."
-                />
-                <Step
-                  n={4}
-                  text="Solicite o repasse para a sua chave PIX quando precisar."
-                />
-              </ol>
-            </CardContent>
-          </Card>
+      {/* Como funciona */}
+      <section className="border-b bg-brand-surface">
+        <div className="container py-12">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Como funciona
+          </h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <Step
+              n={1}
+              text="Crie sua campanha gratuitamente e conte a sua história."
+            />
+            <Step
+              n={2}
+              text="Compartilhe o link com amigos, familiares e nas redes sociais."
+            />
+            <Step
+              n={3}
+              text="Receba as doações por PIX e acompanhe tudo pelo painel."
+            />
+            <Step
+              n={4}
+              text="Solicite o repasse para a sua chave PIX quando precisar."
+            />
+          </div>
         </div>
       </section>
 
@@ -129,12 +142,12 @@ export default function HomePage() {
 
 function Step({ n, text }: { n: number; text: string }) {
   return (
-    <li className="flex gap-3">
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+    <div className="flex gap-3">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
         {n}
       </span>
-      <span>{text}</span>
-    </li>
+      <p className="text-sm text-muted-foreground">{text}</p>
+    </div>
   );
 }
 
