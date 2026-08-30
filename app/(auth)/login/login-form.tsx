@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { PasswordInput } from "@/components/forms/password-input";
 
 export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, initialFormState);
@@ -60,10 +61,9 @@ export function LoginForm() {
             Esqueci minha senha
           </Link>
         </div>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           className="mt-1.5"

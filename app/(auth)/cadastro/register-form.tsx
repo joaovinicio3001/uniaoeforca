@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { PasswordStrength } from "@/components/forms/password-strength";
+import { PasswordInput } from "@/components/forms/password-input";
 import { formatCPF } from "@/lib/validation/cpf";
 
 export function RegisterForm() {
@@ -126,10 +127,9 @@ export function RegisterForm() {
 
         <div>
           <Label htmlFor="password">Senha</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             autoComplete="new-password"
             required
             className="mt-1.5"
@@ -142,10 +142,9 @@ export function RegisterForm() {
 
         <div>
           <Label htmlFor="confirmPassword">Confirmar senha</Label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
             autoComplete="new-password"
             required
             className="mt-1.5"

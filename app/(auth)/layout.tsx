@@ -27,9 +27,6 @@ export default async function AuthLayout({
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-brand-navy/10 to-brand-navy/30" />
-        <Link href="/" className="absolute left-8 top-8 text-white">
-          <Logo variant="light" />
-        </Link>
       </div>
 
       {/* Fundo com foto (celular) */}

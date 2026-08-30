@@ -28,35 +28,32 @@ export default function RecuperarSenhaPage() {
       <CardHeader>
         <CardTitle>Recuperar senha</CardTitle>
         <CardDescription>
-          Informe seu e-mail e enviaremos um link para redefinir a senha.
+          Informe seu e-mail e enviaremos um código de 6 dígitos para redefinir a
+          senha.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {state.status === "success" ? (
-          <Alert variant="success">
-            <AlertDescription>{state.message}</AlertDescription>
-          </Alert>
-        ) : (
-          <form action={formAction} className="space-y-4" noValidate>
-            {state.status === "error" && state.message && (
-              <Alert variant="destructive">
-                <AlertDescription>{state.message}</AlertDescription>
-              </Alert>
-            )}
-            <div>
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="mt-1.5"
-              />
-            </div>
-            <SubmitButton className="w-full">Enviar link</SubmitButton>
-          </form>
-        )}
+        <form action={formAction} className="space-y-4" noValidate>
+          {state.status === "error" && state.message && (
+            <Alert variant="destructive">
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          )}
+          <div>
+            <Label htmlFor="email">E-mail</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className="mt-1.5"
+            />
+          </div>
+          <SubmitButton className="w-full" pendingText="Enviando…">
+            Enviar código
+          </SubmitButton>
+        </form>
         <p className="mt-4 text-center text-sm text-muted-foreground">
           <Link href="/login" className="text-primary hover:underline">
             Voltar para o login

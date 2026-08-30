@@ -348,12 +348,75 @@ export async function forgotPasswordAction(
     redirectTo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/auth/confirm?next=/painel/seguranca`,
   });
 
-  // Resposta sempre idêntica — não revela se o e-mail existe.
-  return {
-    status: "success",
-    message:
-      "Se houver uma conta com esse e-mail, enviamos as instruções de recuperação.",
-  };
+  // Vai para a tela de código sempre — não revela se o e-mail existe.
+  redirect(
+    `/recuperar-senha/redefinir?email=${encodeURIComponent(parsed.data.email)}`,
+  );
+}
+
+// Redefine a senha com o código de 6 dígitos recebido por e-mail.
+export async function resetWithCodeAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const ip = await clientIp();
+  const rl = rateLimit(`reset-code:${ip}`, RATE_LIMITS.login);
+  if (!rl.ok) {
+    return {
+      status: "error",
+      message: `Muitas tentativas. Tente novamente em ${rl.retryAfterSeconds}s.`,
+    };
+  }
+
+  const otp = verifyOtpSchema.safeParse({
+    email: formData.get("email"),
+    token: formData.get("token"),
+  });
+  const pw = resetPasswordSchema.safeParse({
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!otp.success || !pw.success) {
+    return {
+      status: "error",
+      message: "Revise os campos destacados.",
+      fieldErrors: {
+        ...(otp.success ? {} : zodToFieldErrors(otp.error)),
+        ...(pw.success ? {} : zodToFieldErrors(pw.error)),
+      },
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: otp.data.email,
+    token: otp.data.token,
+    type: "recovery",
+  });
+  if (error || !data.user) {
+    return {
+      status: "error",
+      message: "Código incorreto ou expirado. Peça um novo e tente de novo.",
+    };
+  }
+
+  const { error: upErr } = await supabase.auth.updateUser({
+    password: pw.data.password,
+  });
+  if (upErr) {
+    return { status: "error", message: "Não foi possível atualizar a senha." };
+  }
+
+  await writeAuditLog({
+    actorUserId: data.user.id,
+    action: "auth.password_reset",
+    entityType: "user",
+    entityId: data.user.id,
+  });
+  await recordIpSignal(data.user.id);
+
+  redirect("/painel");
 }
 
 export async function resetPasswordAction(
