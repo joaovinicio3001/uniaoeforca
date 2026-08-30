@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShieldCheck,
   HandCoins,
@@ -6,9 +7,6 @@ import {
   HeartHandshake,
   Share2,
   Eye,
-  BadgeCheck,
-  ScanEye,
-  Lock,
   ArrowRight,
 } from "lucide-react";
 
@@ -112,34 +110,32 @@ export default async function HomePage() {
 
       {/* Segurança / confiança */}
       <section className="border-b bg-brand-surface">
-        <div className="container py-12">
-          <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold">Você está segura aqui</h2>
-            <p className="mt-2 text-muted-foreground">
-              Cuidamos de cada etapa para que a sua doação chegue a quem precisa
-              e para que quem arrecada receba com tranquilidade.
-            </p>
-          </div>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="container py-14 text-center">
+          <h2 className="text-2xl font-bold">Você está seguro(a)</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-muted-foreground">
+            Cuidamos de cada etapa para que a sua doação chegue a quem precisa e
+            para que quem arrecada receba com tranquilidade.
+          </p>
+          <div className="mx-auto mt-10 grid max-w-4xl gap-6 sm:grid-cols-2">
             <Trust
-              icon={<BadgeCheck />}
+              img="/trust/identidade.jpg"
               title="Identidade verificada"
               text="Todo mundo que arrecada passa por verificação de identidade antes de sacar."
             />
             <Trust
-              icon={<Eye />}
+              img="/trust/transparencia.jpg"
               title="Transparência total"
               text="Cada doação e cada saque ficam registrados e disponíveis para conferência."
             />
             <Trust
-              icon={<ScanEye />}
-              title="Monitoramento antifraude"
-              text="Acompanhamos comportamentos suspeitos e podemos segurar valores em análise."
+              img="/trust/monitoramento.jpg"
+              title="Monitoramento ativo"
+              text="Acompanhamos comportamentos suspeitos 24h por dia para prevenir fraudes e proteger todos os envolvidos."
             />
             <Trust
-              icon={<Lock />}
-              title="Dinheiro protegido"
-              text="O saldo só é liberado para a chave PIX do responsável, depois de conferência."
+              img="/trust/liberacao.jpg"
+              title="Liberação segura"
+              text="O valor é liberado via PIX diretamente para quem arrecada, após todas as verificações."
             />
           </div>
         </div>
@@ -300,21 +296,23 @@ export default async function HomePage() {
 }
 
 function Trust({
-  icon,
+  img,
   title,
   text,
 }: {
-  icon: React.ReactNode;
+  img: string;
   title: string;
   text: string;
 }) {
   return (
-    <div className="rounded-xl border bg-card p-5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10 text-success [&_svg]:size-5">
-        {icon}
+    <div className="flex items-center gap-4 rounded-xl border bg-card p-4 text-left">
+      <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-28">
+        <Image src={img} alt="" fill sizes="112px" className="object-cover" />
       </div>
-      <h3 className="mt-3 font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+      <div>
+        <h3 className="font-semibold">{title}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+      </div>
     </div>
   );
 }
