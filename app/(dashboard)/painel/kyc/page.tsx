@@ -23,7 +23,7 @@ export default async function KycPage() {
       <div>
         <h1 className="text-2xl font-bold">Verificação de identidade (KYC)</h1>
         <p className="text-muted-foreground">
-          Necessária antes do primeiro saque e para valores maiores (doc §14).
+          Necessária antes do primeiro saque e para valores maiores.
         </p>
       </div>
 

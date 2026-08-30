@@ -58,8 +58,7 @@ export default async function CarteiraPage() {
       <div>
         <h1 className="text-2xl font-bold">Carteira</h1>
         <p className="text-muted-foreground">
-          Saldo por estado, calculado a partir do ledger. Não editável manualmente
-          (doc §21.3).
+          Seu saldo, atualizado automaticamente a cada doação confirmada.
         </p>
       </div>
 
@@ -84,10 +83,9 @@ export default async function CarteiraPage() {
       <Alert variant="info">
         <Info className="size-4" />
         <AlertDescription>
-          Nesta fase o valor liberado vai direto de <em>pendente</em> para{" "}
-          <em>disponível</em> (sem período de retenção). Holds de risco entram na
-          Fase 5. Solicitação de saque (Fase 4) move de <em>disponível</em> para{" "}
-          <em>reservado</em>.
+          Cada doação confirmada entra como <em>disponível</em> para saque. Ao
+          solicitar um saque, o valor passa para <em>reservado</em> até o repasse
+          ser concluído.
         </AlertDescription>
       </Alert>
 

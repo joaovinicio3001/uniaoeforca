@@ -69,12 +69,13 @@ export default async function PainelPage({
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <p>
-            <strong className="text-foreground">Campanhas já estão no ar:</strong>{" "}
-            crie um rascunho, adicione imagens, envie para análise e publique.
+            <strong className="text-foreground">Crie a sua campanha:</strong>{" "}
+            monte um rascunho, adicione fotos e a sua história, e envie para
+            análise. Após a aprovação, é só compartilhar o link.
           </p>
           <p>
-            <strong className="text-foreground">Fase 2 — PIX In:</strong> receber
-            doações com confirmação por webhook idempotente (em construção).
+            <strong className="text-foreground">Receba por PIX:</strong> as
+            doações entram automaticamente e você acompanha tudo pela Carteira.
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
             <Link

@@ -201,8 +201,8 @@ export default async function GerenciarCampanhaPage({
         <CardHeader>
           <CardTitle>Financeiro</CardTitle>
           <CardDescription>
-            Projeção a partir do ledger de dupla entrada. {totals.count}{" "}
-            {totals.count === 1 ? "doação paga" : "doações pagas"}.
+            Calculado a partir de todas as doações confirmadas. {totals.count}{" "}
+            {totals.count === 1 ? "doação recebida" : "doações recebidas"}.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -262,7 +262,7 @@ export default async function GerenciarCampanhaPage({
         <CardHeader>
           <CardTitle>Atualizações</CardTitle>
           <CardDescription>
-            Publique novidades para os apoiadores (doc §21.2).
+            Publique novidades para quem apoia a sua campanha.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">

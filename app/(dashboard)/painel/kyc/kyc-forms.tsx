@@ -77,8 +77,8 @@ export function EnhancedKycForm() {
         </div>
       ))}
       <p className="text-xs text-muted-foreground">
-        Documentos ficam armazenados de forma privada, com acesso restrito à
-        equipe de análise (doc §34.6).
+        Seus documentos ficam guardados em local privado, com acesso restrito à
+        equipe de verificação.
       </p>
       <SubmitButton size="sm" pendingText="Enviando…">
         Enviar documentos

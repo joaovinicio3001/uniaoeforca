@@ -133,8 +133,7 @@ export function RegisterForm() {
       <label className="flex items-start gap-2 text-sm text-muted-foreground">
         <input type="checkbox" name="marketingOptIn" className="mt-0.5" />
         <span>
-          Quero receber novidades e dicas por e-mail (opcional, doc §6.1 —
-          consentimento separado).
+          Quero receber novidades e dicas por e-mail (opcional).
         </span>
       </label>
 

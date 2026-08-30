@@ -116,8 +116,8 @@ export function DonationForm({
 
       <div className="rounded-lg bg-brand-surface p-3 text-xs text-muted-foreground">
         Pagamento por <strong>PIX</strong>. Na próxima tela você verá o QR Code e o
-        código copia-e-cola. A confirmação é automática assim que o provedor
-        aprovar — nunca creditamos por conta do navegador (doc §8.3).
+        código copia-e-cola. A doação entra na campanha automaticamente assim que
+        o pagamento é confirmado.
       </div>
 
       <SubmitButton variant="success" className="w-full" pendingText="Gerando PIX…">

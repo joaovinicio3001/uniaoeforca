@@ -148,8 +148,8 @@ export function PaymentView({
         Aguardando confirmação do pagamento…
       </div>
       <p className="text-center text-xs text-muted-foreground">
-        Assim que o provedor confirmar, esta tela atualiza sozinha. Pode fechar e
-        acompanhar pela campanha depois.
+        Assim que o pagamento for confirmado, esta tela atualiza sozinha. Você
+        pode fechar e acompanhar pela campanha depois.
       </p>
     </div>
   );

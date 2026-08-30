@@ -104,14 +104,14 @@ export function WithdrawalForm({
           className="mt-1.5"
         />
         <p className="mt-1 text-xs text-muted-foreground">
-          Reautenticação para uma ação sensível (doc §6.2).
+          Confirme a sua senha para autorizar o saque.
         </p>
         <FieldError errors={state.fieldErrors?.password} />
       </div>
 
       <p className="text-xs text-muted-foreground">
-        A solicitação reserva o valor do seu saldo imediatamente e entra em
-        análise. Prazo de processamento: até 24 horas (doc §11.3).
+        Ao solicitar, o valor sai do seu saldo disponível na hora e o pedido
+        entra em análise. O repasse costuma cair em até 24 horas.
       </p>
 
       <SubmitButton className="w-full" pendingText="Enviando…">

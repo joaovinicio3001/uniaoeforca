@@ -4,45 +4,47 @@ import { LegalPage } from "@/components/layout/legal-page";
 
 export const metadata: Metadata = {
   title: "Segurança",
-  description: "As medidas de segurança e antifraude da União & Força.",
+  description: "Como a União & Força protege o seu dinheiro, a sua conta e os seus dados.",
 };
 
 export default function SegurancaPage() {
   return (
     <LegalPage title="Segurança">
-      <h2>Da sua conta</h2>
+      <p>
+        A confiança de quem cria uma campanha e de quem doa é o mais importante
+        para nós. Veja as medidas que protegem cada etapa.
+      </p>
+
+      <h2>Sua conta</h2>
       <ul>
-        <li>Senha forte obrigatória e verificação de e-mail.</li>
-        <li>Reautenticação por senha para ações sensíveis, como solicitar saque.</li>
-        <li>Sessões podem ser revogadas; MFA obrigatório para a equipe administrativa.</li>
+        <li>Senha forte obrigatória e confirmação de e-mail no cadastro.</li>
+        <li>Pedimos a sua senha de novo antes de ações importantes, como solicitar um saque.</li>
+        <li>Você pode encerrar suas sessões quando quiser. A equipe interna usa autenticação em duas etapas.</li>
       </ul>
 
-      <h2>Do dinheiro</h2>
+      <h2>Seu dinheiro</h2>
       <ul>
-        <li>Doações só são creditadas após confirmação validada do provedor — nunca pelo navegador.</li>
-        <li>Todo webhook é idempotente: repetições não duplicam efeitos.</li>
-        <li>Saldo em livro-razão imutável; correções só por lançamento compensatório.</li>
-        <li>Solicitação de saque reserva o valor na hora e impede gasto duplo.</li>
-        <li>
-          Falha de PIX Out devolve o valor ao saldo disponível — nada
-          &ldquo;some&rdquo;.
-        </li>
+        <li>Uma doação só entra na campanha depois de o pagamento ser confirmado — nunca automaticamente pelo navegador.</li>
+        <li>Se um pagamento é processado mais de uma vez, o sistema reconhece e não duplica a doação.</li>
+        <li>Todo o histórico financeiro é permanente. Qualquer ajuste fica registrado e justificado.</li>
+        <li>Ao pedir um saque, o valor é separado na hora — não dá para usar o mesmo dinheiro duas vezes.</li>
+        <li>Se um repasse falha, o valor volta para o saldo disponível na mesma hora. Nada some.</li>
       </ul>
 
-      <h2>Antifraude</h2>
+      <h2>Contra fraudes</h2>
       <ul>
-        <li>Verificação de identidade (KYC) antes do primeiro saque e para valores maiores.</li>
-        <li>Checagens de velocidade, valor incomum e múltiplas contas.</li>
-        <li>Possibilidade de reter saldo e bloquear contas sob análise, sem apagar histórico.</li>
-        <li>Dupla aprovação para saques de alto valor.</li>
+        <li>Verificação de identidade antes do primeiro saque e para valores maiores.</li>
+        <li>Monitoramento de comportamentos suspeitos, valores fora do padrão e contas repetidas.</li>
+        <li>Podemos segurar um saldo ou bloquear uma conta em análise, sem apagar o histórico.</li>
+        <li>Saques de valor alto passam por dupla aprovação.</li>
       </ul>
 
-      <h2>Da plataforma</h2>
+      <h2>A plataforma</h2>
       <ul>
-        <li>HTTPS obrigatório com HSTS e política de segurança de conteúdo (CSP).</li>
-        <li>Isolamento de dados por usuário no banco (RLS) e cifra de dados sensíveis em repouso.</li>
-        <li>Trilha de auditoria de todas as ações administrativas e financeiras.</li>
-        <li>Backups criptografados e conciliação diária com os provedores.</li>
+        <li>Conexão sempre criptografada (HTTPS).</li>
+        <li>Cada usuário só enxerga os próprios dados. Informações sensíveis ficam criptografadas.</li>
+        <li>Registro de todas as ações da equipe e de todas as movimentações financeiras.</li>
+        <li>Backups criptografados e conferência diária com os meios de pagamento.</li>
       </ul>
 
       <p>

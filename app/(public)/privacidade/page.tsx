@@ -91,10 +91,10 @@ export default function PrivacidadePage() {
 
       <h2>7. Segurança</h2>
       <p>
-        Adotamos HTTPS obrigatório, isolamento de dados por usuário no banco
-        (RLS), cifra de dados sensíveis em repouso, MFA para a administração,
-        trilha de auditoria e backups criptografados. Nenhum sistema é
-        infalível; incidentes relevantes são comunicados conforme a LGPD.
+        Adotamos conexão criptografada (HTTPS), isolamento de dados por conta,
+        criptografia de informações sensíveis, autenticação em duas etapas para
+        a equipe, registro de auditoria e backups criptografados. Nenhum sistema
+        é infalível; incidentes relevantes são comunicados conforme a LGPD.
       </p>
 
       <h2>8. Cookies</h2>

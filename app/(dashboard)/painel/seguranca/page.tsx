@@ -61,9 +61,8 @@ export default async function SegurancaPage() {
         <CardHeader>
           <CardTitle>Alterar senha</CardTitle>
           <CardDescription>
-            Use uma senha forte: 8+ caracteres, com maiúsculas, minúsculas,
-            números e símbolos. MFA e reautenticação para ações sensíveis chegam
-            nas fases seguintes (doc §6.2).
+            Use uma senha forte: 8 caracteres ou mais, com maiúsculas,
+            minúsculas, números e símbolos.
           </CardDescription>
         </CardHeader>
         <CardContent>

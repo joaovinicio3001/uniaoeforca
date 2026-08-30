@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: "Taxas",
   description:
-    "As taxas da União & Força são configuráveis, versionadas e exibidas com transparência.",
+    "Criar campanha é grátis. Você só paga uma taxa pequena e transparente quando recebe uma doação.",
 };
 
 export default async function TaxasPage() {
@@ -49,8 +49,9 @@ export default async function TaxasPage() {
     <div className="container max-w-2xl py-12">
       <h1 className="text-3xl font-bold">Taxas</h1>
       <p className="mt-2 text-muted-foreground">
-        Nossas taxas são configuráveis, versionadas e ficam registradas em cada
-        doação (doc §9). Sem surpresas.
+        Criar uma campanha é grátis. Não tem mensalidade nem taxa de adesão. Você
+        só paga quando uma doação é confirmada — e a taxa fica registrada em cada
+        doação, sem surpresa.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -87,9 +88,9 @@ export default async function TaxasPage() {
           </CardHeader>
           <CardContent>
             <dl className="divide-y text-sm">
-              <Row label="Doação bruta" value={`+ ${formatBRL(example.grossCents)}`} />
+              <Row label="Doação recebida" value={`+ ${formatBRL(example.grossCents)}`} />
               <Row
-                label="Custo estimado do provedor de PIX"
+                label="Custo do PIX (banco / meio de pagamento)"
                 value={`- ${formatBRL(example.providerFeeCents)}`}
               />
               <Row
@@ -97,14 +98,14 @@ export default async function TaxasPage() {
                 value={`- ${formatBRL(example.platformFeeCents)}`}
               />
               <Row
-                label="Crédito líquido para a campanha"
+                label="Valor que fica para a campanha"
                 value={`+ ${formatBRL(example.netCents)}`}
                 strong
               />
             </dl>
             <p className="mt-3 text-xs text-muted-foreground">
-              O custo do provedor é uma estimativa reconciliada depois com o valor
-              efetivamente cobrado pela API (doc §9, §12).
+              O custo do PIX pode variar um pouco conforme o meio de pagamento; o
+              valor exato de cada doação aparece no seu extrato.
             </p>
           </CardContent>
         </Card>

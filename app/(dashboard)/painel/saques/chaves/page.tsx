@@ -32,7 +32,7 @@ export default async function ChavesPixPage() {
       <div>
         <h1 className="text-2xl font-bold">Chaves PIX</h1>
         <p className="text-muted-foreground">
-          Cadastre as chaves que poderão receber seus saques (doc §11.4).
+          Cadastre as chaves PIX que poderão receber os seus saques.
         </p>
       </div>
 

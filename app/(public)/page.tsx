@@ -1,11 +1,11 @@
 import Link from "next/link";
 import {
   ShieldCheck,
-  Receipt,
+  HandCoins,
   Wallet,
   HeartHandshake,
-  LineChart,
-  Lock,
+  Share2,
+  Eye,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,18 +19,18 @@ export default function HomePage() {
         <div className="container grid gap-10 py-20 md:grid-cols-2 md:items-center">
           <div className="space-y-6">
             <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
-              PIX · Ledger auditável · Saque com análise
+              Grátis para criar · Doações por PIX · Saque quando quiser
             </span>
             <h1 className="text-4xl font-bold leading-tight md:text-5xl">
-              Transforme apoio em ação.
+              Junte pessoas por uma causa.
             </h1>
             <p className="max-w-md text-lg text-white/80">
-              Crie uma campanha, receba contribuições por PIX e acompanhe a
-              arrecadação com um saldo rastreável e auditável.
+              Crie uma campanha gratuita, receba doações por PIX e acompanhe cada
+              contribuição em tempo real. Simples, rápido e seguro.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg" variant="accent">
-                <Link href="/cadastro">Começar uma campanha</Link>
+                <Link href="/cadastro">Criar minha campanha</Link>
               </Button>
               <Button
                 asChild
@@ -38,7 +38,7 @@ export default function HomePage() {
                 variant="outline"
                 className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
-                <Link href="/campanhas">Explorar causas</Link>
+                <Link href="/campanhas">Ver campanhas</Link>
               </Button>
             </div>
           </div>
@@ -46,21 +46,24 @@ export default function HomePage() {
           <Card className="bg-white/95">
             <CardContent className="space-y-4 p-6 text-card-foreground">
               <p className="text-sm font-semibold text-muted-foreground">
-                Como o dinheiro se move
+                Como funciona
               </p>
               <ol className="space-y-3 text-sm">
-                <Step n={1} text="Doador paga via PIX na página da campanha." />
+                <Step
+                  n={1}
+                  text="Crie sua campanha gratuitamente e conte a sua história."
+                />
                 <Step
                   n={2}
-                  text="O provedor confirma o pagamento por webhook validado."
+                  text="Compartilhe o link com amigos, familiares e nas redes sociais."
                 />
                 <Step
                   n={3}
-                  text="O ledger credita o valor líquido — nunca pelo navegador."
+                  text="Receba as doações por PIX e acompanhe tudo pelo painel."
                 />
                 <Step
                   n={4}
-                  text="Beneficiário solicita saque; sai por PIX após análise."
+                  text="Solicite o repasse para a sua chave PIX quando precisar."
                 />
               </ol>
             </CardContent>
@@ -71,38 +74,38 @@ export default function HomePage() {
       {/* Pilares */}
       <section className="container py-16">
         <h2 className="text-center text-2xl font-bold">
-          Feito para receber e repassar com responsabilidade
+          Tudo o que você precisa para arrecadar com segurança
         </h2>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <Feature
             icon={<HeartHandshake />}
-            title="Campanhas com propósito"
-            text="Categorias de saúde, emergência, animais, educação, família e mais."
+            title="Para qualquer causa"
+            text="Saúde, emergências, animais, educação, projetos, família e muito mais."
           />
           <Feature
-            icon={<Receipt />}
-            title="PIX confirmado de verdade"
-            text="Crédito só entra após confirmação do provedor. Idempotência ponta a ponta."
+            icon={<HandCoins />}
+            title="Doações por PIX"
+            text="Quem quer ajudar paga na hora pelo QR Code. A doação entra automaticamente após a confirmação."
           />
           <Feature
             icon={<Wallet />}
-            title="Saldo rastreável"
-            text="Pendente, disponível, reservado e sacado — cada centavo reconciliável."
+            title="Acompanhe em tempo real"
+            text="Veja cada doação, o total arrecadado e quanto já está disponível para saque."
+          />
+          <Feature
+            icon={<Share2 />}
+            title="Fácil de divulgar"
+            text="Um link para compartilhar em qualquer lugar e uma página bonita para a sua campanha."
+          />
+          <Feature
+            icon={<Eye />}
+            title="Transparência total"
+            text="Extrato completo de tudo o que entra e sai, doação por doação."
           />
           <Feature
             icon={<ShieldCheck />}
-            title="Saques com análise"
-            text="Solicitação reserva o saldo na hora; pagamento após aprovação e checagens."
-          />
-          <Feature
-            icon={<LineChart />}
-            title="Transparência"
-            text="Extrato completo com a origem de cada lançamento do ledger."
-          />
-          <Feature
-            icon={<Lock />}
-            title="Segurança"
-            text="RLS no banco, MFA para administração, trilha de auditoria de tudo."
+            title="Segurança de verdade"
+            text="Verificação de identidade, monitoramento contra fraudes e seus dados protegidos."
           />
         </div>
       </section>
@@ -112,11 +115,11 @@ export default function HomePage() {
         <div className="container flex flex-col items-center gap-4 py-14 text-center">
           <h2 className="text-2xl font-bold">Pronto para começar?</h2>
           <p className="max-w-md text-muted-foreground">
-            Crie sua conta gratuitamente e publique sua primeira campanha em
-            minutos.
+            Criar a campanha é grátis. Você só paga uma pequena taxa quando
+            recebe uma doação.
           </p>
           <Button asChild size="lg">
-            <Link href="/cadastro">Criar conta</Link>
+            <Link href="/cadastro">Criar minha campanha</Link>
           </Button>
         </div>
       </section>
