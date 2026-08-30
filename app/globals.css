@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Tokens de tema. Paleta oficial (doc §32):
+ *   navy #06356B · green #05B76B · yellow #FDBD22 · white #FFFFFF · surface #F6F8FA
+ * Valores em HSL para o Tailwind (`hsl(var(--token))`).
+ */
+@layer base {
+  :root {
+    --background: 210 20% 97%;        /* #F6F8FA */
+    --foreground: 212 40% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 212 40% 12%;
+
+    --primary: 211 89% 22%;          /* #06356B navy */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 16% 93%;
+    --secondary-foreground: 212 40% 16%;
+
+    --success: 152 94% 37%;          /* #05B76B green */
+    --success-foreground: 0 0% 100%;
+
+    --accent: 44 98% 56%;            /* #FDBD22 yellow */
+    --accent-foreground: 212 45% 14%;
+
+    --muted: 210 16% 93%;
+    --muted-foreground: 213 12% 42%;
+
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 86%;
+    --ring: 211 89% 30%;
+
+    --radius: 0.7rem;
+  }
+
+  .dark {
+    --background: 213 44% 8%;
+    --foreground: 210 20% 96%;
+
+    --card: 213 40% 11%;
+    --card-foreground: 210 20% 96%;
+
+    --primary: 210 90% 66%;
+    --primary-foreground: 213 44% 8%;
+
+    --secondary: 213 30% 18%;
+    --secondary-foreground: 210 20% 96%;
+
+    --success: 152 74% 44%;
+    --success-foreground: 213 44% 8%;
+
+    --accent: 44 90% 58%;
+    --accent-foreground: 213 44% 10%;
+
+    --muted: 213 28% 18%;
+    --muted-foreground: 214 14% 66%;
+
+    --destructive: 0 64% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 213 26% 22%;
+    --input: 213 26% 24%;
+    --ring: 210 90% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Conteúdo rico já sanitizado (história/atualizações de campanha). */
+.rich-text {
+  @apply leading-relaxed text-foreground/90;
+}
+.rich-text > * + * {
+  @apply mt-4;
+}
+.rich-text h2 {
+  @apply mt-8 text-xl font-semibold;
+}
+.rich-text h3 {
+  @apply mt-6 text-lg font-semibold;
+}
+.rich-text h4 {
+  @apply mt-4 font-semibold;
+}
+.rich-text ul {
+  @apply list-disc space-y-1 pl-6;
+}
+.rich-text ol {
+  @apply list-decimal space-y-1 pl-6;
+}
+.rich-text a {
+  @apply font-medium text-primary underline underline-offset-2;
+}
+.rich-text blockquote {
+  @apply border-l-2 border-border pl-4 italic text-muted-foreground;
+}
+.rich-text hr {
+  @apply my-6 border-t;
+}

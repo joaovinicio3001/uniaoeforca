@@ -1,0 +1,24 @@
+# Config do Supabase CLI (opcional — o projeto remoto já existe:
+# qmpsranxguyxxbplvcjf). Serve para `supabase link` / `supabase db push` e para
+# um stack local com `supabase start`.
+
+project_id = "uniao-e-forca"
+
+[db]
+major_version = 17
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:3000/auth/confirm",
+  "https://uniaoeforca.com.br/auth/confirm",
+]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_confirmations = true
+secure_password_change = true
+
+[analytics]
+enabled = false

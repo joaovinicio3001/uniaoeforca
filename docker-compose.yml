@@ -1,0 +1,26 @@
+# Ambiente local (doc §26). O banco/Auth é o Supabase gerenciado (§34.1),
+# então aqui subimos apenas a aplicação web. Para desenvolvimento com hot-reload
+# use `npm run dev` diretamente; este compose serve para validar a imagem de
+# produção localmente.
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    environment:
+      # Segredos só em runtime — nunca em ARG/imagem.
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      CPF_HASH_PEPPER: ${CPF_HASH_PEPPER:-dev-only-pepper-troque-em-producao-uniaoeforca}
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
