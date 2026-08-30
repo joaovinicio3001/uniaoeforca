@@ -61,7 +61,7 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative isolate overflow-hidden border-b bg-brand-navy text-white">
+      <section className="relative isolate flex min-h-[70vh] items-center overflow-hidden border-b bg-brand-navy text-white md:min-h-[80vh]">
         <picture>
           <source media="(min-width: 768px)" srcSet="/hero.jpg" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,20 +72,20 @@ export default async function HomePage() {
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/90 to-brand-navy/40 md:to-brand-navy/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/85 via-brand-navy/20 to-brand-navy/40 md:to-transparent" />
+        <div className="absolute inset-0 bg-brand-navy/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/85 via-brand-navy/30 to-brand-navy/60" />
 
-        <div className="container relative py-24 md:py-32">
-          <div className="max-w-xl space-y-6">
-            <h1 className="text-4xl font-bold leading-tight drop-shadow-sm md:text-5xl">
-              Sozinho é difícil. Junto, a gente consegue.
+        <div className="container relative py-24 text-center">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <h1 className="text-4xl font-bold leading-tight drop-shadow md:text-5xl">
+              Juntos, todo desafio pode se transformar em esperança.
             </h1>
-            <p className="max-w-md text-lg text-white/85">
-              Crie uma campanha gratuita, receba doações por PIX e conte com
-              quem quer ajudar. Para uma emergência, um tratamento, um sonho ou
-              uma causa — você não precisa passar por isso sozinho.
+            <p className="mx-auto max-w-2xl text-lg text-white/90">
+              Quando a vida surpreende ou um sonho precisa de apoio para
+              acontecer, a União &amp; Força conecta você a pessoas dispostas a
+              fazer a diferença.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
               <Button asChild size="lg" variant="accent">
                 <Link href="/cadastro">Criar minha campanha</Link>
               </Button>
