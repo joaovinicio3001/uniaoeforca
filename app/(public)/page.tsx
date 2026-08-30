@@ -116,7 +116,7 @@ export default async function HomePage() {
             Cuidamos de cada etapa para que a sua doação chegue a quem precisa e
             para que quem arrecada receba com tranquilidade.
           </p>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-6 sm:grid-cols-2">
+          <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 sm:gap-6">
             <Trust
               img="/trust/identidade.jpg"
               title="Identidade verificada"
@@ -201,7 +201,7 @@ export default async function HomePage() {
         <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
           Do primeiro clique ao dinheiro na sua conta.
         </p>
-        <div className="mx-auto mt-12 grid max-w-4xl gap-x-6 gap-y-10 sm:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 gap-y-8 sm:mt-12 sm:gap-x-6 sm:gap-y-10">
           <Step
             n={1}
             img="/how/criar.png"
@@ -309,13 +309,21 @@ function Trust({
   text: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border bg-card p-4 text-left">
-      <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-28">
-        <Image src={img} alt="" fill sizes="112px" className="object-cover" />
+    <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 text-left sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-lg bg-muted sm:aspect-auto sm:h-28 sm:w-24">
+        <Image
+          src={img}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 45vw, 112px"
+          className="object-cover"
+        />
       </div>
       <div>
-        <h3 className="font-semibold">{title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+        <h3 className="text-sm font-semibold sm:text-base">{title}</h3>
+        <p className="mt-0.5 text-xs text-muted-foreground sm:mt-1 sm:text-sm">
+          {text}
+        </p>
       </div>
     </div>
   );
@@ -333,17 +341,17 @@ function Step({
   text: string;
 }) {
   return (
-    <div className="relative rounded-2xl border bg-card p-5 pt-6 text-left">
-      <span className="absolute -top-4 left-5 flex h-9 w-9 items-center justify-center rounded-full bg-brand-navy text-sm font-bold text-white shadow">
+    <div className="relative rounded-2xl border bg-card p-3 pt-5 text-center sm:p-5 sm:pt-6 sm:text-left">
+      <span className="absolute -top-3.5 left-1/2 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full bg-brand-navy text-xs font-bold text-white shadow sm:left-5 sm:h-9 sm:w-9 sm:translate-x-0 sm:text-sm">
         {n}
       </span>
-      <div className="flex items-center gap-4">
-        <div className="relative h-28 w-28 shrink-0">
+      <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+        <div className="relative h-16 w-16 shrink-0 sm:h-28 sm:w-28">
           <Image src={img} alt="" fill sizes="112px" className="object-contain" />
         </div>
         <div>
-          <h3 className="font-bold">{title}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+          <h3 className="text-sm font-bold sm:text-base">{title}</h3>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{text}</p>
         </div>
       </div>
     </div>

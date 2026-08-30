@@ -4,43 +4,36 @@ import { ChevronDown, Menu, Search } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth/session";
-import { listCategories } from "@/lib/campaigns/queries";
 
 type MenuLink = { label: string; href: string; desc?: string };
 
-const COMO_AJUDAR: MenuLink[] = [
-  { label: "Encontrar uma campanha", href: "/campanhas", desc: "Explore causas ativas e apoie quem precisa" },
-  { label: "Como doar", href: "/como-funciona", desc: "Passo a passo para contribuir por PIX" },
-  { label: "Regras e segurança", href: "/regras-e-seguranca", desc: "Como protegemos a sua doação" },
-  { label: "Central de ajuda", href: "/ajuda", desc: "Perguntas frequentes e contato" },
-];
-
-const COMO_FUNCIONA: MenuLink[] = [
-  { label: "Como criar uma campanha", href: "/como-funciona", desc: "Passo a passo completo, do rascunho ao saque" },
-  { label: "Custos", href: "/custos", desc: "Tudo o que você paga — e o que é grátis" },
-  { label: "Regras e segurança", href: "/regras-e-seguranca", desc: "O que é permitido e como protegemos todo mundo" },
+const GROUPS: { title: string; items: MenuLink[] }[] = [
+  {
+    title: "Como ajudar",
+    items: [
+      { label: "Encontrar uma campanha", href: "/campanhas", desc: "Explore causas ativas e apoie quem precisa" },
+      { label: "Como doar", href: "/como-doar", desc: "Passo a passo para contribuir por PIX" },
+    ],
+  },
+  {
+    title: "Descubra",
+    items: [
+      { label: "Todas as campanhas", href: "/campanhas", desc: "Veja tudo o que está acontecendo agora" },
+      { label: "Buscar campanhas", href: "/buscar", desc: "Procure por nome, cidade ou causa" },
+    ],
+  },
+  {
+    title: "Como funciona",
+    items: [
+      { label: "Como criar uma campanha", href: "/como-funciona", desc: "Passo a passo completo, do rascunho ao saque" },
+      { label: "Regras e segurança", href: "/regras-e-seguranca", desc: "O que é permitido, os custos e as proteções" },
+      { label: "Central de ajuda", href: "/ajuda", desc: "Respostas rápidas para as dúvidas mais comuns" },
+    ],
+  },
 ];
 
 export async function PublicHeader() {
-  const [user, categories] = await Promise.all([
-    getSessionUser(),
-    listCategories().catch(() => []),
-  ]);
-
-  const descubra: MenuLink[] = [
-    { label: "Todas as campanhas", href: "/campanhas", desc: "Veja tudo o que está acontecendo agora" },
-    { label: "Buscar campanha", href: "/buscar", desc: "Procure por nome, cidade ou causa" },
-    ...categories.slice(0, 8).map((c) => ({
-      label: c.name,
-      href: `/campanhas?categoria=${c.slug}`,
-    })),
-  ];
-
-  const groups: { title: string; items: MenuLink[] }[] = [
-    { title: "Como ajudar", items: COMO_AJUDAR },
-    { title: "Descubra", items: descubra },
-    { title: "Como funciona", items: COMO_FUNCIONA },
-  ];
+  const user = await getSessionUser();
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card">
@@ -51,7 +44,7 @@ export async function PublicHeader() {
 
         {/* Desktop */}
         <nav className="hidden items-center gap-1 md:flex">
-          {groups.map((g) => (
+          {GROUPS.map((g) => (
             <Dropdown key={g.title} label={g.title} items={g.items} />
           ))}
         </nav>
@@ -91,7 +84,7 @@ export async function PublicHeader() {
             </summary>
             <div className="fixed inset-x-0 top-16 z-50 border-t bg-card shadow-lg">
               <div className="container max-h-[calc(100dvh-4rem)] overflow-y-auto py-4">
-                {groups.map((g) => (
+                {GROUPS.map((g) => (
                   <div key={g.title} className="border-b py-3 first:pt-0 last:border-b-0">
                     <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {g.title}

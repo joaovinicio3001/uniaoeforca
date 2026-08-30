@@ -44,9 +44,10 @@ export default function TermosPage() {
 
       <h2>4. Custos</h2>
       <p>
-        Os custos vigentes estão em <a href="/custos">/custos</a> e são
-        registrados em cada doação no momento da transação. Mudanças de taxa não
-        afetam pagamentos já realizados.
+        Os custos vigentes estão em{" "}
+        <a href="/regras-e-seguranca">Regras e segurança</a> e são registrados em
+        cada doação no momento da transação. Mudanças de taxa não afetam
+        pagamentos já realizados.
       </p>
 
       <h2>5. Saques</h2>

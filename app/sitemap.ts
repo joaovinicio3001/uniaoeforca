@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/campanhas",
     "/como-funciona",
-    "/custos",
+    "/como-doar",
     "/regras-e-seguranca",
     "/ajuda",
     "/termos",

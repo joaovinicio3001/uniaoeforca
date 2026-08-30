@@ -15,7 +15,7 @@ export function PublicFooter() {
           links={[
             ["Campanhas", "/campanhas"],
             ["Como criar uma campanha", "/como-funciona"],
-            ["Custos", "/custos"],
+            ["Como doar", "/como-doar"],
           ]}
         />
         <FooterCol
