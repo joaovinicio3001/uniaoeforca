@@ -235,7 +235,7 @@ export default async function HomePage() {
           <h2 className="text-center text-2xl font-bold">
             Por que criar a sua campanha no União &amp; Força
           </h2>
-          <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
             <Feature
               icon={<HeartHandshake />}
               title="Para qualquer causa"
@@ -369,12 +369,12 @@ function Feature({
 }) {
   return (
     <Card>
-      <CardContent className="space-y-2 p-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:size-5">
+      <CardContent className="space-y-2 p-4 sm:p-6">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary sm:size-10 [&_svg]:size-4 sm:[&_svg]:size-5">
           {icon}
         </div>
-        <h3 className="font-semibold">{title}</h3>
-        <p className="text-sm text-muted-foreground">{text}</p>
+        <h3 className="text-sm font-semibold sm:text-base">{title}</h3>
+        <p className="text-xs text-muted-foreground sm:text-sm">{text}</p>
       </CardContent>
     </Card>
   );

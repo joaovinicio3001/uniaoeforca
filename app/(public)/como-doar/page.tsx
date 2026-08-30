@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  UserRoundCheck,
+  Search,
+  HandHeart,
+  Wallet,
   QrCode,
+  CircleCheckBig,
+  UserRoundCheck,
   ShieldCheck,
-  ReceiptText,
   EyeOff,
+  ReceiptText,
   CircleHelp,
 } from "lucide-react";
 
@@ -15,7 +19,7 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Como doar",
   description:
-    "Doar na União & Força é rápido, por PIX e sem precisar de conta. Veja como funciona.",
+    "Doar na União & Força é rápido, por PIX e sem precisar de conta. Passo a passo completo.",
 };
 
 export default function ComoDoarPage() {
@@ -24,48 +28,128 @@ export default function ComoDoarPage() {
       <h1 className="text-3xl font-bold sm:text-4xl">Como doar</h1>
       <p className="mt-3 text-lg text-muted-foreground">
         Ajudar leva menos de um minuto: é por PIX, entra na campanha
-        automaticamente e não precisa de conta. Toque em cada tópico para ver os
-        detalhes.
+        automaticamente e não precisa de conta. Toque em cada etapa para ver o
+        passo a passo completo.
       </p>
 
       <div className="mt-8">
         <Accordion
           items={[
             {
-              icon: <UserRoundCheck />,
-              title: "Preciso ter conta para doar?",
+              icon: <Search />,
+              title: "1. Encontre a campanha",
               content: (
                 <>
                   <p>
-                    Não. Você pode doar por PIX sem criar conta e sem fazer
-                    login. A conta só é necessária para quem vai{" "}
-                    <em>criar e gerenciar</em> uma campanha ou solicitar saques.
+                    Abra a página da campanha que você quer apoiar. Se ainda não
+                    tem o link, use a busca:
+                  </p>
+                  <ul>
+                    <li>
+                      Em <Link href="/campanhas">Campanhas</Link> você vê todas as
+                      campanhas ativas e pode filtrar por categoria e por estado.
+                    </li>
+                    <li>
+                      Em <Link href="/buscar">Buscar</Link> você procura por nome,
+                      cidade ou causa.
+                    </li>
+                  </ul>
+                  <p>
+                    Antes de doar, leia a história e confira o que está sendo
+                    pedido. Toda campanha passou por análise antes de ficar
+                    pública.
+                  </p>
+                </>
+              ),
+            },
+            {
+              icon: <HandHeart />,
+              title: "2. Toque em “Quero ajudar”",
+              content: (
+                <p>
+                  Na página da campanha, toque no botão{" "}
+                  <strong>&ldquo;Quero ajudar&rdquo;</strong>. Você é levado para
+                  a tela de contribuição. Não é preciso fazer login nem criar
+                  conta.
+                </p>
+              ),
+            },
+            {
+              icon: <Wallet />,
+              title: "3. Escolha o valor e se identifique",
+              content: (
+                <>
+                  <p>
+                    Informe o valor que você quer doar — qualquer valor faz
+                    diferença. Depois:
+                  </p>
+                  <ul>
+                    <li>
+                      escreva o seu nome (aparece na lista de apoiadores da
+                      campanha), <strong>ou</strong>
+                    </li>
+                    <li>
+                      marque a opção de <strong>doação anônima</strong> — o seu
+                      nome não aparece, mas o valor continua contando no total.
+                    </li>
+                  </ul>
+                  <p>
+                    Se quiser, deixe uma mensagem de apoio para quem criou a
+                    campanha.
                   </p>
                 </>
               ),
             },
             {
               icon: <QrCode />,
-              title: "Passo a passo da doação",
+              title: "4. Pague com PIX",
               content: (
-                <ol className="list-decimal space-y-2 pl-6">
-                  <li>Abra a página da campanha que você quer apoiar.</li>
-                  <li>
-                    Toque em <strong>&ldquo;Quero ajudar&rdquo;</strong>.
-                  </li>
-                  <li>
-                    Escolha o valor e informe o seu nome — ou marque para doar de
-                    forma anônima.
-                  </li>
-                  <li>
-                    Pague com PIX pelo <strong>QR Code</strong> ou pelo{" "}
-                    <strong>código copia-e-cola</strong>, no app do seu banco.
-                  </li>
-                  <li>
-                    Pronto. Assim que o pagamento é confirmado, a doação entra na
-                    campanha e a tela atualiza sozinha.
-                  </li>
-                </ol>
+                <>
+                  <p>Na tela seguinte aparece o pagamento por PIX. Você pode:</p>
+                  <ul>
+                    <li>
+                      escanear o <strong>QR Code</strong> com o app do seu banco,
+                      ou
+                    </li>
+                    <li>
+                      copiar o <strong>código copia-e-cola</strong> e colar na
+                      opção &ldquo;PIX Copia e Cola&rdquo; do seu banco.
+                    </li>
+                  </ul>
+                  <p>
+                    Funciona com qualquer banco ou carteira digital. O valor já
+                    vem preenchido — é só confirmar o pagamento no app.
+                  </p>
+                </>
+              ),
+            },
+            {
+              icon: <CircleCheckBig />,
+              title: "5. Pronto — acompanhe",
+              content: (
+                <>
+                  <p>
+                    Assim que o pagamento é confirmado, a doação entra na campanha
+                    e a tela atualiza sozinha. Você pode fechar a página e voltar
+                    depois pela campanha.
+                  </p>
+                  <p>
+                    A sua contribuição passa a contar no total arrecadado na
+                    hora, e aparece na lista de apoiadores (a menos que você tenha
+                    escolhido doar de forma anônima).
+                  </p>
+                </>
+              ),
+            },
+            {
+              icon: <UserRoundCheck />,
+              title: "Preciso ter conta para doar?",
+              content: (
+                <p>
+                  Não. Você doa por PIX sem criar conta e sem fazer login. A
+                  conta só é necessária para quem vai <em>criar e gerenciar</em>{" "}
+                  uma campanha ou solicitar saques.
+                </p>
               ),
             },
             {
@@ -88,6 +172,17 @@ export default function ComoDoarPage() {
               ),
             },
             {
+              icon: <EyeOff />,
+              title: "Posso doar anonimamente?",
+              content: (
+                <p>
+                  Pode. Na hora de doar, marque a opção de doação anônima — o seu
+                  nome não aparece na campanha. O valor continua sendo
+                  contabilizado normalmente no total arrecadado.
+                </p>
+              ),
+            },
+            {
               icon: <ReceiptText />,
               title: "Recebo comprovante?",
               content: (
@@ -96,17 +191,6 @@ export default function ComoDoarPage() {
                   registrada. O comprovante do PIX você também tem no app do seu
                   banco. Doações não anônimas aparecem na lista de apoiadores da
                   campanha.
-                </p>
-              ),
-            },
-            {
-              icon: <EyeOff />,
-              title: "Posso doar anonimamente?",
-              content: (
-                <p>
-                  Pode. Na hora de doar, marque a opção de doação anônima — o seu
-                  nome não aparece na campanha. O valor continua sendo
-                  contabilizado normalmente no total arrecadado.
                 </p>
               ),
             },

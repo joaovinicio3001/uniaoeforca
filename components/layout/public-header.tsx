@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown, Menu, Search } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, Search } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -83,43 +83,39 @@ export async function PublicHeader() {
               <Menu className="size-5" />
             </summary>
             <div className="fixed inset-x-0 top-16 z-50 border-t bg-card shadow-lg">
-              <div className="container max-h-[calc(100dvh-4rem)] overflow-y-auto py-4">
+              <div className="container max-h-[calc(100dvh-4rem)] overflow-y-auto py-2">
                 {GROUPS.map((g) => (
-                  <div key={g.title} className="border-b py-3 first:pt-0 last:border-b-0">
-                    <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <details key={g.title} className="group/sub border-b">
+                    <summary className="flex list-none cursor-pointer items-center justify-between py-4 text-sm font-medium [&::-webkit-details-marker]:hidden">
                       {g.title}
-                    </p>
-                    {g.items.map((it) => (
-                      <Link
-                        key={it.label + it.href}
-                        href={it.href}
-                        className="block rounded-lg px-1 py-2 hover:bg-secondary"
-                      >
-                        <span className="block text-sm font-medium">{it.label}</span>
-                        {it.desc && (
-                          <span className="block text-xs text-muted-foreground">
-                            {it.desc}
-                          </span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
+                      <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open/sub:rotate-180" />
+                    </summary>
+                    <div className="pb-2">
+                      {g.items.map((it) => (
+                        <Link
+                          key={it.label + it.href}
+                          href={it.href}
+                          className="block rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        >
+                          {it.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </details>
                 ))}
-                <div className="flex flex-col gap-2 pt-4">
-                  {user ? (
-                    <Button asChild>
-                      <Link href="/painel">Meu painel</Link>
-                    </Button>
-                  ) : (
-                    <>
-                      <Button asChild variant="outline">
-                        <Link href="/login">Entrar</Link>
-                      </Button>
-                      <Button asChild>
-                        <Link href="/cadastro">Criar conta</Link>
-                      </Button>
-                    </>
-                  )}
+
+                <Link
+                  href={user ? "/painel" : "/login"}
+                  className="flex items-center justify-between border-b py-4 text-sm font-medium text-primary"
+                >
+                  {user ? "Meu painel" : "Minha conta"}
+                  <ArrowRight className="size-4" />
+                </Link>
+
+                <div className="py-4">
+                  <Button asChild size="lg" className="w-full">
+                    <Link href="/cadastro">Criar minha campanha</Link>
+                  </Button>
                 </div>
               </div>
             </div>
