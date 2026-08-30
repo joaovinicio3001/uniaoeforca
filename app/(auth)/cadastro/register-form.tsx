@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { PasswordStrength } from "@/components/forms/password-strength";
-import { OAuthButtons } from "@/components/forms/oauth-buttons";
 import { formatCPF } from "@/lib/validation/cpf";
 
 export function RegisterForm() {
@@ -43,8 +42,6 @@ export function RegisterForm() {
 
   return (
     <div className="space-y-4">
-      <OAuthButtons label="cadastrar" />
-
       <form action={formAction} className="space-y-4" noValidate>
         {state.status === "error" && state.duplicate && (
           <Alert variant="warning">

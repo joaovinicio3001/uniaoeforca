@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
-import { OAuthButtons } from "@/components/forms/oauth-buttons";
 
 export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, initialFormState);
@@ -21,17 +20,6 @@ export function LoginForm() {
 
   return (
     <div className="space-y-4">
-      <OAuthButtons label="entrar" />
-
-      {(linkError === "oauth" || linkError === "provedor-invalido") && (
-        <Alert variant="warning">
-          <AlertDescription>
-            Não foi possível entrar com esse provedor. Tente novamente ou use
-            e-mail e senha.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <form action={formAction} className="space-y-4" noValidate>
         <input type="hidden" name="redirect" value={redirectTo} />
 
