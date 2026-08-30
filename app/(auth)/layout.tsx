@@ -17,7 +17,7 @@ export default async function AuthLayout({
     <div className="grid min-h-dvh lg:grid-cols-2">
       <div className="hidden flex-col justify-between bg-brand-navy p-10 text-white lg:flex">
         <Link href="/" className="text-white">
-          <Logo className="[&_span]:text-white" />
+          <Logo variant="light" />
         </Link>
         <div className="space-y-4">
           <h1 className="text-3xl font-bold leading-tight">
@@ -29,7 +29,7 @@ export default async function AuthLayout({
           </p>
         </div>
         <p className="text-xs text-white/60">
-          uniaoeforca.com.br · Fase 0 — ambiente de desenvolvimento
+          uniaoeforca.com.br
         </p>
       </div>
 

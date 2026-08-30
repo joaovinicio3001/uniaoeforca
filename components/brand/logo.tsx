@@ -1,33 +1,46 @@
+import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 
 /**
- * Marca União & Força. Wordmark original (doc §32: "Não copiar HTML/CSS/textos/
- * assets de plataformas existentes"). Dois nós entrelaçados = "união".
+ * Marca União & Força.
+ * - `full` (padrão): lockup completo (símbolo + wordmark), para fundos claros.
+ * - `light`: símbolo + texto branco, para fundos escuros (a wordmark do lockup
+ *   é azul-marinho e some sobre a Baleia Azul).
  */
 export function Logo({
   className,
-  withText = true,
+  variant = "full",
 }: {
   className?: string;
-  withText?: boolean;
+  variant?: "full" | "light";
 }) {
-  return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <svg
-        viewBox="0 0 32 32"
-        className="h-7 w-7"
-        role="img"
-        aria-label="União & Força"
-      >
-        <circle cx="12" cy="16" r="8" fill="none" stroke="#042f50" strokeWidth="3" />
-        <circle cx="20" cy="16" r="8" fill="none" stroke="#20af3d" strokeWidth="3" />
-        <circle cx="16" cy="16" r="2.5" fill="#e3c518" />
-      </svg>
-      {withText && (
-        <span className="text-base font-bold tracking-tight text-foreground">
-          União <span className="text-success">&amp;</span> Força
+  if (variant === "light") {
+    return (
+      <span className={cn("inline-flex items-center gap-2.5", className)}>
+        <Image
+          src="/logo-mark.png"
+          alt=""
+          width={512}
+          height={512}
+          className="h-8 w-8"
+          priority
+        />
+        <span className="text-lg font-bold tracking-tight text-white">
+          União <span className="font-normal text-white/70">&amp;</span> Força
         </span>
-      )}
-    </span>
+      </span>
+    );
+  }
+
+  return (
+    <Image
+      src="/logo-lockup.png"
+      alt="União &amp; Força"
+      width={1912}
+      height={628}
+      className={cn("h-9 w-auto", className)}
+      priority
+    />
   );
 }

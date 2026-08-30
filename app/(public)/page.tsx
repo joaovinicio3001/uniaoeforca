@@ -19,7 +19,7 @@ export default function HomePage() {
         <div className="container grid gap-10 py-20 md:grid-cols-2 md:items-center">
           <div className="space-y-6">
             <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
-              Fase 0 · Fundação em desenvolvimento
+              PIX · Ledger auditável · Saque com análise
             </span>
             <h1 className="text-4xl font-bold leading-tight md:text-5xl">
               Transforme apoio em ação.
@@ -112,8 +112,8 @@ export default function HomePage() {
         <div className="container flex flex-col items-center gap-4 py-14 text-center">
           <h2 className="text-2xl font-bold">Pronto para começar?</h2>
           <p className="max-w-md text-muted-foreground">
-            Crie sua conta gratuitamente e publique a primeira campanha assim que
-            a Fase 1 estiver disponível.
+            Crie sua conta gratuitamente e publique sua primeira campanha em
+            minutos.
           </p>
           <Button asChild size="lg">
             <Link href="/cadastro">Criar conta</Link>
