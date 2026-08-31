@@ -113,8 +113,33 @@ export async function runPixOutReconciliation(sinceHours = 168): Promise<RunResu
           .eq("id", po.withdrawal_id)
           .maybeSingle();
 
+        // Provedor terminou mas o saque ainda está "processing" (webhook perdido):
+        // finaliza a transição para "paid"/"failed".
+        if (
+          w &&
+          w.status === "processing" &&
+          ["complete", "failed", "canceled"].includes(st.status)
+        ) {
+          await admin.rpc("confirm_withdrawal_payout", {
+            p_provider: po.provider,
+            p_provider_reference: po.provider_reference,
+            p_provider_status: st.status,
+            p_amount_cents:
+              st.amountCents ?? st.netAmountCents ?? (null as unknown as number),
+            p_end_to_end_id: st.endToEndId ?? undefined,
+            p_failure_reason: st.failureReason ?? undefined,
+            p_external_fee_cents: st.feeCents ?? undefined,
+            p_raw: st.raw as never,
+          });
+          w.status = ["failed", "canceled"].includes(st.status)
+            ? "failed"
+            : "paid";
+        }
+
+        // O valor do repasse (amount) é o que deve bater com net_cents; netAmount
+        // já vem descontado do gatewayFee do provedor.
         const netOk =
-          st.netAmountCents == null || !w || st.netAmountCents === w.net_cents;
+          st.amountCents == null || !w || st.amountCents === w.net_cents;
         const feeChanged =
           st.feeCents != null && st.feeCents !== (po.external_fee_cents ?? null);
         const statusMap: Record<string, string> = {

@@ -286,7 +286,11 @@ export async function refreshPayoutStatus(
       p_provider: po.provider,
       p_provider_reference: po.provider_reference,
       p_provider_status: st.status,
-      p_amount_cents: st.netAmountCents ?? st.amountCents ?? (null as unknown as number),
+      // Valor a conferir é o do repasse (== net_cents do saque), não o
+      // netAmount do provedor — esse já vem descontado do gatewayFee e faria
+      // o guard de "amount_mismatch" barrar a transição para "paid".
+      p_amount_cents:
+        st.amountCents ?? st.netAmountCents ?? (null as unknown as number),
       p_end_to_end_id: st.endToEndId ?? undefined,
       p_failure_reason: st.failureReason ?? undefined,
       p_external_fee_cents: st.feeCents ?? undefined,
@@ -301,6 +305,43 @@ export async function refreshPayoutStatus(
     .eq("withdrawal_id", withdrawalId)
     .maybeSingle();
   return { status: after?.status ?? po.status };
+}
+
+/**
+ * Varre saques em "processing" e reconfirma cada um no provedor. Usado para o
+ * usuário ver "Pago" assim que o PIX Out conclui, sem depender de webhook —
+ * chamado ao abrir a lista de saques e pelo cron de conciliação.
+ */
+export async function finalizeProcessingPayouts(opts?: {
+  userId?: string;
+  limit?: number;
+}): Promise<{ checked: number; paid: number; failed: number }> {
+  const provider = getPixOutProvider();
+  if (provider.isMock) return { checked: 0, paid: 0, failed: 0 };
+
+  const admin = createAdminClient();
+  let q = admin
+    .from("withdrawals")
+    .select("id")
+    .eq("status", "processing")
+    .order("requested_at", { ascending: true })
+    .limit(opts?.limit ?? 30);
+  if (opts?.userId) q = q.eq("user_id", opts.userId);
+  const { data: rows } = await q;
+  if (!rows?.length) return { checked: 0, paid: 0, failed: 0 };
+
+  let paid = 0;
+  let failed = 0;
+  for (const r of rows) {
+    try {
+      const { status } = await refreshPayoutStatus(r.id);
+      if (status === "paid") paid += 1;
+      else if (status === "failed") failed += 1;
+    } catch {
+      /* segue para o próximo */
+    }
+  }
+  return { checked: rows.length, paid, failed };
 }
 
 /** Mock only: simula o desfecho do PIX Out (admin). */
@@ -359,7 +400,8 @@ export async function processGGPixWebhook(
       p_provider: po.provider,
       p_provider_reference: event.externalRef,
       p_provider_status: st.status,
-      p_amount_cents: st.netAmountCents ?? st.amountCents ?? (null as unknown as number),
+      p_amount_cents:
+        st.amountCents ?? st.netAmountCents ?? (null as unknown as number),
       p_end_to_end_id: st.endToEndId ?? undefined,
       p_failure_reason: st.failureReason ?? undefined,
       p_external_fee_cents: st.feeCents ?? undefined,

@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { serverEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { writeAuditLog } from "@/lib/security/audit";
+import { finalizeProcessingPayouts } from "@/lib/withdrawals/service";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -29,6 +30,13 @@ export async function GET(request: NextRequest) {
 
   const { data: expired } = await admin.rpc("expire_stale_payments", { p_hours: 25 });
   const { data: nearSla } = await admin.rpc("withdrawals_near_sla", { p_hours: 20 });
+
+  // Backstop de webhook: finaliza saques que o provedor já concluiu.
+  const payouts = await finalizeProcessingPayouts({ limit: 50 }).catch(() => ({
+    checked: 0,
+    paid: 0,
+    failed: 0,
+  }));
 
   const slaList = (nearSla ?? []) as { id: string; requested_at: string }[];
   if (slaList.length > 0) {
@@ -56,5 +64,6 @@ export async function GET(request: NextRequest) {
     ok: true,
     expired_payments: expired ?? 0,
     withdrawals_near_sla: slaList.length,
+    payouts_finalized: payouts,
   });
 }

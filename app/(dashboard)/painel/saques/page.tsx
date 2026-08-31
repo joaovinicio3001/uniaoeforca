@@ -3,6 +3,7 @@ import Link from "next/link";
 import { KeyRound, Plus, Wallet } from "lucide-react";
 
 import { listMyWithdrawals } from "@/lib/withdrawals/queries";
+import { finalizeProcessingPayouts } from "@/lib/withdrawals/service";
 import { getMyWalletBalance } from "@/lib/ledger/queries";
 import { formatBRL } from "@/lib/utils";
 import {
@@ -17,11 +18,16 @@ import { WithdrawalHistory } from "./withdrawal-history";
 export const metadata: Metadata = { title: "Saques" };
 
 export default async function SaquesPage() {
-  const [withdrawals, balance] = await Promise.all([
-    listMyWithdrawals(),
-    getMyWalletBalance(),
-  ]);
+  let withdrawals = await listMyWithdrawals();
 
+  // Se algum saque está "processando", reconfirma no provedor antes de renderizar
+  // — assim o usuário vê "Pago" assim que o PIX Out conclui.
+  if (withdrawals[0] && withdrawals.some((w) => w.status === "processing")) {
+    await finalizeProcessingPayouts({ userId: withdrawals[0].user_id });
+    withdrawals = await listMyWithdrawals();
+  }
+
+  const balance = await getMyWalletBalance();
   const canWithdraw = balance.available_cents > 0;
 
   const rows = withdrawals.map((w) => {
