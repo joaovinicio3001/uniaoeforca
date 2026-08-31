@@ -6,13 +6,15 @@ import { requestWithdrawalAction } from "../actions";
 import { initialWithdrawalFormState } from "@/lib/withdrawals/form-state";
 import { PIX_KEY_TYPE_LABEL, type PixKeyType } from "@/lib/withdrawals/pix-keys";
 import { formatBRL } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { PasswordInput } from "@/components/forms/password-input";
 
 type Key = { id: string; type: PixKeyType; masked: string };
+
+const fieldBase =
+  "h-11 w-full rounded-[11px] border border-[#DFE7F2] bg-white px-3.5 text-[16px] text-[#071D4A] outline-none transition-shadow placeholder:text-[#9AA8BF] focus:border-[#0645D8] focus:shadow-[0_0_0_3px_rgba(6,69,216,0.10)]";
+const labelBase = "mb-1.5 block text-sm font-semibold text-[#071D4A]";
 
 export function WithdrawalForm({
   keys,
@@ -38,19 +40,21 @@ export function WithdrawalForm({
   return (
     <form action={formAction} className="space-y-5" noValidate>
       {state.status === "error" && state.message && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
+        <div className="rounded-[12px] border border-[#FFCFC9] bg-[#FFF1F0] px-3.5 py-3 text-sm text-[#8A1B12]">
+          {state.message}
+        </div>
       )}
 
       <div>
-        <Label htmlFor="pixKeyId">Chave PIX de destino</Label>
+        <label htmlFor="pixKeyId" className={labelBase}>
+          Chave PIX de destino
+        </label>
         <select
           id="pixKeyId"
           name="pixKeyId"
           required
           defaultValue={keys[0]?.id ?? ""}
-          className="mt-1.5 h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
+          className={fieldBase}
         >
           {keys.map((k) => (
             <option key={k.id} value={k.id}>
@@ -62,59 +66,69 @@ export function WithdrawalForm({
       </div>
 
       <div>
-        <Label htmlFor="amount">Valor do saque</Label>
-        <Input
+        <label htmlFor="amount" className={labelBase}>
+          Valor do saque
+        </label>
+        <input
           id="amount"
           name="amount"
           inputMode="decimal"
           required
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="mt-1.5"
+          className={fieldBase}
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1.5 text-[13px] text-[#5B6B88]">
           Disponível: {formatBRL(availableCents)}
         </p>
         <FieldError errors={state.fieldErrors?.amount} />
       </div>
 
-      <div className="rounded-lg border bg-brand-surface p-3 text-sm">
+      <div className="rounded-[12px] border border-[#DFE7F2] bg-[#F7FAFD] p-4 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Valor solicitado</span>
-          <span className="tabular-nums">{formatBRL(amountCents)}</span>
+          <span className="text-[#5B6B88]">Valor solicitado</span>
+          <span className="tabular-nums text-[#071D4A]">
+            {formatBRL(amountCents)}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Taxa de saque</span>
-          <span className="tabular-nums">− {formatBRL(feeCents)}</span>
+        <div className="mt-1 flex justify-between">
+          <span className="text-[#5B6B88]">Taxa de saque</span>
+          <span className="tabular-nums text-[#071D4A]">
+            − {formatBRL(feeCents)}
+          </span>
         </div>
-        <div className="mt-1 flex justify-between border-t pt-1 font-semibold">
-          <span>Você recebe</span>
-          <span className="tabular-nums">{formatBRL(net)}</span>
+        <div className="mt-2 flex justify-between border-t border-[#E4EBF5] pt-2 font-bold">
+          <span className="text-[#071D4A]">Você recebe</span>
+          <span className="tabular-nums text-[#20B85A]">{formatBRL(net)}</span>
         </div>
       </div>
 
       <div>
-        <Label htmlFor="password">Confirme sua senha</Label>
-        <Input
+        <label htmlFor="password" className={labelBase}>
+          Confirme sua senha
+        </label>
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
-          className="mt-1.5"
+          className="h-11 rounded-[11px] border-[#DFE7F2] bg-white text-[16px] text-[#071D4A] focus-visible:ring-2 focus-visible:ring-[#0645D8]/20"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1.5 text-[13px] text-[#5B6B88]">
           Confirme a sua senha para autorizar o saque.
         </p>
         <FieldError errors={state.fieldErrors?.password} />
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[13px] leading-relaxed text-[#5B6B88]">
         Ao solicitar, o valor sai do seu saldo disponível na hora e o pedido
         entra em análise. O repasse costuma cair em até 24 horas.
       </p>
 
-      <SubmitButton className="w-full" pendingText="Enviando…">
+      <SubmitButton
+        className="h-12 w-full rounded-[11px] bg-[#0645D8] text-[15px] font-semibold hover:bg-[#0B4FE5]"
+        pendingText="Enviando…"
+      >
         Solicitar saque
       </SubmitButton>
     </form>

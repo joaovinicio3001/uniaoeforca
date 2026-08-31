@@ -183,6 +183,56 @@ export async function listMyCampaigns(): Promise<CampaignRow[]> {
   return data ?? [];
 }
 
+export type MyCampaignCard = CampaignRow & {
+  coverUrl: string | null;
+  categoryName: string | null;
+  mediaCount: number;
+};
+
+/**
+ * Campanhas do usuário + metadados de apresentação (capa, categoria, nº de
+ * imagens) para os cards do painel. Uma consulta a mais só de leitura.
+ */
+export async function listMyCampaignsWithMeta(): Promise<MyCampaignCard[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: rows } = await supabase
+    .from("campaigns")
+    .select(
+      "*, categories(name), campaign_media!campaigns_cover_media_fk(public_url)",
+    )
+    .eq("owner_user_id", user.id)
+    .order("updated_at", { ascending: false });
+  if (!rows?.length) return [];
+
+  const ids = rows.map((r) => r.id);
+  const { data: mediaRows } = await supabase
+    .from("campaign_media")
+    .select("campaign_id")
+    .in("campaign_id", ids);
+  const counts = new Map<string, number>();
+  for (const m of mediaRows ?? []) {
+    counts.set(m.campaign_id, (counts.get(m.campaign_id) ?? 0) + 1);
+  }
+
+  return rows.map((r) => {
+    const { categories, campaign_media, ...campaign } = r as typeof r & {
+      categories: { name: string } | null;
+      campaign_media: { public_url: string } | null;
+    };
+    return {
+      ...(campaign as CampaignRow),
+      coverUrl: campaign_media?.public_url ?? null,
+      categoryName: categories?.name ?? null,
+      mediaCount: counts.get(r.id) ?? 0,
+    };
+  });
+}
+
 export type PublicSupporter = {
   name: string;
   amount_cents: number;

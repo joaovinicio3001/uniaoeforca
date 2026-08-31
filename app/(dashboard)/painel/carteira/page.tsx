@@ -1,15 +1,25 @@
 import type { Metadata } from "next";
-import { Info } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Banknote,
+  Hourglass,
+  Lock,
+  ShieldAlert,
+  Wallet,
+} from "lucide-react";
 
 import { getMyWalletBalance, getMyWalletStatement } from "@/lib/ledger/queries";
 import { formatBRL, formatDateTimeBR } from "@/lib/utils";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  CARD,
+  InfoBanner,
+  PageHeader,
+  SectionCard,
+  StatCard,
+  btnPrimary,
+} from "@/components/dashboard/ui";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Carteira" };
 
@@ -25,107 +35,134 @@ export default async function CarteiraPage() {
     getMyWalletStatement(80),
   ]);
 
-  const cards = [
+  const canWithdraw = balance.available_cents > 0;
+
+  const subCards = [
     {
+      icon: Hourglass,
+      tone: "amber" as const,
       label: "Pendente",
       value: balance.pending_cents,
-      hint: "Confirmado, em período de disponibilidade/risco.",
+      hint: "Confirmado, no período de liberação.",
     },
     {
-      label: "Disponível",
-      value: balance.available_cents,
-      hint: "Elegível para saque.",
-    },
-    {
+      icon: Lock,
+      tone: "blue" as const,
       label: "Reservado",
       value: balance.reserved_cents,
-      hint: "Retido por solicitações de saque abertas.",
+      hint: "Ligado a pedidos de saque em aberto.",
     },
     {
-      label: "Retido (risco)",
+      icon: ShieldAlert,
+      tone: "slate" as const,
+      label: "Retido",
       value: balance.held_cents,
-      hint: "Bloqueado por análise de risco.",
+      hint: "Temporariamente indisponível.",
     },
     {
+      icon: Banknote,
+      tone: "purple" as const,
       label: "Sacado",
       value: balance.withdrawn_cents,
-      hint: "Concluído via PIX Out.",
+      hint: "Valores já repassados via PIX.",
     },
   ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Carteira</h1>
-        <p className="text-muted-foreground">
-          Seu saldo, atualizado automaticamente a cada doação confirmada.
-        </p>
-      </div>
+      <PageHeader
+        title="Carteira"
+        subtitle="Seu saldo, atualizado automaticamente a cada doação confirmada."
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((c) => (
-          <Card key={c.label}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {c.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold tabular-nums">
-                {formatBRL(c.value)}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">{c.hint}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Alert variant="info">
-        <Info className="size-4" />
-        <AlertDescription>
-          Cada doação confirmada entra como <em>disponível</em> para saque. Ao
-          solicitar um saque, o valor passa para <em>reservado</em> até o repasse
-          ser concluído.
-        </AlertDescription>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Extrato</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          {statement.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Sem lançamentos ainda. Assim que uma doação for confirmada, ela
-              aparece aqui.
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_2fr]">
+        {/* Saldo disponível — destaque */}
+        <div className={cn(CARD, "flex flex-col justify-between gap-5 p-6")}>
+          <div>
+            <div className="flex items-center gap-2 text-[#5B6B88]">
+              <Wallet className="size-[18px] text-[#20B85A]" />
+              <span className="text-sm font-medium">Saldo disponível</span>
+            </div>
+            <p className="mt-2 text-[32px] font-bold leading-none text-[#20B85A]">
+              {formatBRL(balance.available_cents)}
             </p>
+            <p className="mt-2 text-[13px] text-[#5B6B88]">
+              Elegível para saque.
+            </p>
+          </div>
+          {canWithdraw ? (
+            <Link
+              href="/painel/saques/nova"
+              className={cn(btnPrimary, "w-full bg-[#20B85A] hover:bg-[#1AA150] shadow-[0_8px_20px_rgba(32,184,90,0.25)]")}
+            >
+              Solicitar saque <ArrowRight className="size-4" />
+            </Link>
           ) : (
-            <table className="w-full min-w-[560px] text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
-                <tr>
-                  <th className="py-2">Data</th>
-                  <th>Descrição</th>
-                  <th>Conta</th>
-                  <th className="text-right">Valor</th>
+            <p className="rounded-[11px] bg-[#F7FAFD] px-4 py-3 text-center text-[13px] text-[#5B6B88]">
+              Você poderá solicitar um saque quando tiver saldo disponível.
+            </p>
+          )}
+        </div>
+
+        {/* Demais saldos */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {subCards.map((c) => (
+            <StatCard
+              key={c.label}
+              icon={c.icon}
+              tone={c.tone}
+              label={c.label}
+              value={formatBRL(c.value)}
+              hint={c.hint}
+            />
+          ))}
+        </div>
+      </div>
+
+      <InfoBanner>
+        Cada doação confirmada entra como <strong>disponível</strong> para saque.
+        Ao pedir um saque, o valor passa para <strong>reservado</strong> até o
+        repasse ser concluído e então vira <strong>sacado</strong>.
+      </InfoBanner>
+
+      <SectionCard title="Extrato" bodyClassName="p-0">
+        {statement.length === 0 ? (
+          <p className="p-6 text-sm text-[#5B6B88]">
+            Sem lançamentos ainda. Assim que uma doação for confirmada, ela
+            aparece aqui.
+          </p>
+        ) : (
+          <>
+            {/* Desktop */}
+            <table className="hidden w-full text-sm md:table">
+              <thead>
+                <tr className="border-b border-[#EEF3FA] text-left text-[13px] text-[#5B6B88]">
+                  <th className="px-5 py-3 font-semibold">Data</th>
+                  <th className="px-3 py-3 font-semibold">Descrição</th>
+                  <th className="px-3 py-3 font-semibold">Conta</th>
+                  <th className="px-5 py-3 text-right font-semibold">Valor</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-[#EEF3FA]">
                 {statement.map((l, i) => {
                   const signed =
                     l.direction === "credit" ? l.amount_cents : -l.amount_cents;
                   return (
                     <tr key={i}>
-                      <td className="py-2 pr-2 text-muted-foreground">
+                      <td className="px-5 py-3.5 text-[#5B6B88]">
                         {l.posted_at ? formatDateTimeBR(l.posted_at) : "—"}
                       </td>
-                      <td className="pr-2">{l.description}</td>
-                      <td className="pr-2 text-muted-foreground">
+                      <td className="px-3 py-3.5 text-[#071D4A]">
+                        {l.description}
+                      </td>
+                      <td className="px-3 py-3.5 text-[#5B6B88]">
                         {ACCOUNT_LABEL[l.account_code] ?? l.account_code}
                       </td>
                       <td
-                        className={`text-right tabular-nums ${
-                          signed >= 0 ? "text-success" : "text-destructive"
-                        }`}
+                        className={cn(
+                          "px-5 py-3.5 text-right font-semibold tabular-nums",
+                          signed >= 0 ? "text-[#20B85A]" : "text-[#D92D20]",
+                        )}
                       >
                         {signed >= 0 ? "+" : "−"}
                         {formatBRL(Math.abs(signed))}
@@ -135,9 +172,37 @@ export default async function CarteiraPage() {
                 })}
               </tbody>
             </table>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* Mobile */}
+            <ul className="divide-y divide-[#EEF3FA] md:hidden">
+              {statement.map((l, i) => {
+                const signed =
+                  l.direction === "credit" ? l.amount_cents : -l.amount_cents;
+                return (
+                  <li key={i} className="flex items-start justify-between gap-3 p-4">
+                    <div className="min-w-0">
+                      <p className="font-medium text-[#071D4A]">{l.description}</p>
+                      <p className="mt-0.5 text-[13px] text-[#5B6B88]">
+                        {l.posted_at ? formatDateTimeBR(l.posted_at) : "—"} ·{" "}
+                        {ACCOUNT_LABEL[l.account_code] ?? l.account_code}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "shrink-0 font-semibold tabular-nums",
+                        signed >= 0 ? "text-[#20B85A]" : "text-[#D92D20]",
+                      )}
+                    >
+                      {signed >= 0 ? "+" : "−"}
+                      {formatBRL(Math.abs(signed))}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </SectionCard>
     </div>
   );
 }

@@ -1,95 +1,92 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, KeyRound } from "lucide-react";
 
 import { listMyPixKeys } from "@/lib/withdrawals/queries";
 import { PIX_KEY_TYPE_LABEL } from "@/lib/withdrawals/pix-keys";
+import { serverEnv } from "@/lib/env";
 import { formatDateTimeBR } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  EmptyState,
+  InfoBanner,
+  PageHeader,
+  SectionCard,
+  StatusPill,
+} from "@/components/dashboard/ui";
 import { PixKeyForm } from "./pix-key-form";
-import { disablePixKeyAction } from "../actions";
+import { RemovePixKey } from "./remove-pix-key";
 
 export const metadata: Metadata = { title: "Chaves PIX" };
 
 export default async function ChavesPixPage() {
   const keys = await listMyPixKeys();
+  const cooldownHours = serverEnv().WITHDRAWAL_PIX_KEY_COOLDOWN_HOURS;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/painel/saques">
-          <ArrowLeft className="size-4" /> Voltar para saques
-        </Link>
-      </Button>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <Link
+        href="/painel/saques"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5B6B88] transition-colors hover:text-[#0645D8]"
+      >
+        <ArrowLeft className="size-4" /> Voltar para saques
+      </Link>
 
-      <div>
-        <h1 className="text-2xl font-bold">Chaves PIX</h1>
-        <p className="text-muted-foreground">
-          Cadastre as chaves PIX que poderão receber os seus saques.
-        </p>
-      </div>
+      <PageHeader
+        title="Chaves PIX"
+        subtitle="Cadastre as chaves PIX que poderão receber os seus saques."
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Suas chaves</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <SectionCard title="Suas chaves PIX" bodyClassName="p-0">
           {keys.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma chave cadastrada.
-            </p>
+            <EmptyState
+              icon={KeyRound}
+              title="Nenhuma chave cadastrada."
+              description="Adicione sua primeira chave PIX para receber seus saques."
+            />
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y divide-[#EEF3FA]">
               {keys.map((k) => (
                 <li
                   key={k.id}
-                  className="flex items-center justify-between gap-2 py-3"
+                  className="flex items-center justify-between gap-3 p-4"
                 >
-                  <div>
-                    <p className="text-sm font-medium">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#071D4A]">
                       {PIX_KEY_TYPE_LABEL[k.type]} · {k.value_masked}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {k.status === "verified" ? "Verificada" : "Pendente"} ·
+                    {k.owner_name && (
+                      <p className="text-[13px] text-[#5B6B88]">{k.owner_name}</p>
+                    )}
+                    <p className="mt-1 flex items-center gap-2 text-[12px] text-[#5B6B88]">
+                      <StatusPill
+                        tone={k.status === "verified" ? "green" : "amber"}
+                      >
+                        {k.status === "verified" ? "Verificada" : "Pendente"}
+                      </StatusPill>
                       cadastrada em {formatDateTimeBR(k.created_at)}
                     </p>
                   </div>
-                  <form action={disablePixKeyAction}>
-                    <input type="hidden" name="keyId" value={k.id} />
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </form>
+                  <RemovePixKey keyId={k.id} />
                 </li>
               ))}
             </ul>
           )}
-        </CardContent>
-      </Card>
+        </SectionCard>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Adicionar chave</CardTitle>
-          <CardDescription>
-            A chave é armazenada cifrada e usada apenas para o PIX Out.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <SectionCard title="Adicionar chave PIX">
+          <p className="mb-4 text-sm text-[#5B6B88]">
+            A chave é armazenada de forma segura e usada apenas para os seus
+            saques.
+          </p>
           <PixKeyForm />
-        </CardContent>
-      </Card>
+        </SectionCard>
+      </div>
+
+      <InfoBanner>
+        Por segurança, uma chave recém-cadastrada só fica liberada para saque
+        após {cooldownHours} horas. A chave fica guardada de forma cifrada.
+      </InfoBanner>
     </div>
   );
 }

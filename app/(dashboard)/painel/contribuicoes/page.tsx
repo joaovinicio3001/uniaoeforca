@@ -1,91 +1,96 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { CalendarDays, CircleDollarSign, Users } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/auth/session";
-import { formatBRL, formatDateTimeBR } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
+import { formatBRL } from "@/lib/utils";
+import { PageHeader, StatCard } from "@/components/dashboard/ui";
+import {
+  ContributionsView,
+  type ContributionRow,
+} from "./contributions-view";
 
 export const metadata: Metadata = { title: "Minhas contribuições" };
-
-const STATUS_LABEL: Record<string, string> = {
-  created: "Iniciada",
-  pending: "Aguardando pagamento",
-  paid: "Confirmada",
-  failed: "Falhou",
-  expired: "Expirada",
-  refunded: "Estornada",
-  chargeback: "Chargeback",
-};
 
 export default async function ContribuicoesPage() {
   const user = (await getSessionUser())!;
   const supabase = await createClient();
-  const { data: donations } = await supabase
+  const { data } = await supabase
     .from("donations")
-    .select("id, gross_amount_cents, net_amount_cents, status, created_at, paid_at, campaign_id, campaigns(slug, title)")
+    .select(
+      "id, gross_amount_cents, status, created_at, paid_at, campaigns(slug, title, summary, campaign_media!campaigns_cover_media_fk(public_url))",
+    )
     .eq("donor_user_id", user.id)
     .order("created_at", { ascending: false });
 
+  const rows: ContributionRow[] = (data ?? []).map((d) => {
+    const camp = d.campaigns as {
+      slug?: string;
+      title?: string;
+      summary?: string;
+      campaign_media?: { public_url?: string } | null;
+    } | null;
+    return {
+      id: d.id,
+      gross_amount_cents: d.gross_amount_cents,
+      status: d.status,
+      created_at: d.created_at,
+      paid_at: d.paid_at,
+      campaignSlug: camp?.slug ?? null,
+      campaignTitle: camp?.title ?? "Campanha",
+      campaignSummary: camp?.summary ?? null,
+      coverUrl: camp?.campaign_media?.public_url ?? null,
+      payUrl:
+        d.status === "pending" && camp?.slug
+          ? `/campanhas/${camp.slug}/contribuir/${d.id}`
+          : null,
+    };
+  });
+
+  const paid = rows.filter((r) => r.status === "paid");
+  const totalCents = paid.reduce((s, r) => s + r.gross_amount_cents, 0);
+  const lastPaid = paid[0]?.created_at ?? rows[0]?.created_at ?? null;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Minhas contribuições</h1>
-        <p className="text-muted-foreground">
-          Histórico das doações feitas com esta conta.
-        </p>
+      <PageHeader
+        title="Minhas contribuições"
+        subtitle="Histórico das doações feitas com esta conta."
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard
+          icon={CircleDollarSign}
+          tone="blue"
+          label="Total contribuído"
+          value={formatBRL(totalCents)}
+          hint="Em doações confirmadas"
+        />
+        <StatCard
+          icon={Users}
+          tone="green"
+          label="Contribuições confirmadas"
+          value={String(paid.length)}
+          hint={`${rows.length} no total`}
+        />
+        <StatCard
+          icon={CalendarDays}
+          tone="amber"
+          label="Última contribuição"
+          value={
+            lastPaid
+              ? new Intl.DateTimeFormat("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  timeZone: "America/Sao_Paulo",
+                }).format(new Date(lastPaid))
+              : "—"
+          }
+        />
       </div>
 
-      {!donations || donations.length === 0 ? (
-        <Card>
-          <CardContent className="p-10 text-center text-muted-foreground">
-            Você ainda não fez nenhuma contribuição.{" "}
-            <Link href="/campanhas" className="text-primary hover:underline">
-              Explorar campanhas
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <ul className="divide-y rounded-xl border bg-card">
-          {donations.map((d) => {
-            const camp = d.campaigns as { slug?: string; title?: string } | null;
-            return (
-              <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 p-4">
-                <div className="min-w-0">
-                  <Link
-                    href={camp?.slug ? `/campanhas/${camp.slug}` : "#"}
-                    className="font-medium hover:underline"
-                  >
-                    {camp?.title ?? "Campanha"}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDateTimeBR(d.created_at)}
-                    {d.status === "pending" && (
-                      <>
-                        {" · "}
-                        <Link
-                          href={`/campanhas/${camp?.slug}/contribuir/${d.id}`}
-                          className="text-primary hover:underline"
-                        >
-                          concluir pagamento
-                        </Link>
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold tabular-nums">
-                    {formatBRL(d.gross_amount_cents)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {STATUS_LABEL[d.status] ?? d.status}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <ContributionsView rows={rows} />
     </div>
   );
 }
