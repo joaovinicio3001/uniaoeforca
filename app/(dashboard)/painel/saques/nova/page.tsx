@@ -34,13 +34,19 @@ export default async function NovoSaquePage() {
   const supabase = await createClient();
   const { data: rule } = await supabase
     .from("fee_rules")
-    .select("withdrawal_fee_cents")
+    .select(
+      "withdrawal_fee_cents, withdrawal_fee_bps, withdrawal_fee_min_cents",
+    )
     .lte("active_from", new Date().toISOString())
     .or(`active_to.is.null,active_to.gt.${new Date().toISOString()}`)
     .order("active_from", { ascending: false })
     .limit(1)
     .maybeSingle();
-  const feeCents = rule?.withdrawal_fee_cents ?? 0;
+  const fee = {
+    bps: rule?.withdrawal_fee_bps ?? 0,
+    minCents: rule?.withdrawal_fee_min_cents ?? 0,
+    flatCents: rule?.withdrawal_fee_cents ?? 0,
+  };
 
   const needsIdentity = !kyc.hasBasic || !kyc.hasEnhanced;
 
@@ -94,7 +100,7 @@ export default async function NovoSaquePage() {
               masked: k.value_masked,
             }))}
             availableCents={balance.available_cents}
-            feeCents={feeCents}
+            fee={fee}
           />
         </SectionCard>
       )}

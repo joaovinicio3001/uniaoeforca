@@ -119,13 +119,13 @@ export default async function RegrasESegurancaPage() {
                       pelo meio de pagamento e repassada sem margem.
                     </li>
                     <li>
-                      <strong>Custo ao sacar:</strong>{" "}
+                      <strong>Taxa de saque:</strong> 3% do valor, com mínimo de{" "}
+                      {formatBRL(77)}
                       {withdrawalFee > 0
-                        ? `taxa de saque de ${formatBRL(withdrawalFee)} por solicitação, mais `
+                        ? ` (mais ${formatBRL(withdrawalFee)} fixos por solicitação)`
                         : ""}
-                      o custo do PIX no envio (3% do valor, com mínimo de{" "}
-                      {formatBRL(77)}). Os valores aparecem antes de você
-                      confirmar.
+                      . É o custo do PIX no envio, repassado sem margem. O valor
+                      aparece antes de você confirmar.
                     </li>
                   </ul>
                   {ex && (

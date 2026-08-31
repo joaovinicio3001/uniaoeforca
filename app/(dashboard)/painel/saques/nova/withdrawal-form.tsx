@@ -16,14 +16,16 @@ const fieldBase =
   "h-11 w-full rounded-[11px] border border-[#DFE7F2] bg-white px-3.5 text-[16px] text-[#071D4A] outline-none transition-shadow placeholder:text-[#9AA8BF] focus:border-[#0645D8] focus:shadow-[0_0_0_3px_rgba(6,69,216,0.10)]";
 const labelBase = "mb-1.5 block text-sm font-semibold text-[#071D4A]";
 
+type Fee = { bps: number; minCents: number; flatCents: number };
+
 export function WithdrawalForm({
   keys,
   availableCents,
-  feeCents,
+  fee,
 }: {
   keys: Key[];
   availableCents: number;
-  feeCents: number;
+  fee: Fee;
 }) {
   const [state, formAction] = useActionState(
     requestWithdrawalAction,
@@ -35,6 +37,13 @@ export function WithdrawalForm({
 
   const amountCents =
     Math.round(Number(amount.replace(/\./g, "").replace(",", ".")) * 100) || 0;
+  const feeCents =
+    amountCents > 0
+      ? Math.max(
+          Math.ceil((amountCents * fee.bps) / 10000),
+          fee.minCents,
+        ) + fee.flatCents
+      : 0;
   const net = Math.max(0, amountCents - feeCents);
 
   return (
@@ -92,7 +101,15 @@ export function WithdrawalForm({
           </span>
         </div>
         <div className="mt-1 flex justify-between">
-          <span className="text-[#5B6B88]">Taxa de saque</span>
+          <span className="text-[#5B6B88]">
+            Taxa de saque
+            {fee.bps > 0 && (
+              <span className="ml-1 text-[12px]">
+                ({(fee.bps / 100).toLocaleString("pt-BR")}% · mín.{" "}
+                {formatBRL(fee.minCents)})
+              </span>
+            )}
+          </span>
           <span className="tabular-nums text-[#071D4A]">
             − {formatBRL(feeCents)}
           </span>

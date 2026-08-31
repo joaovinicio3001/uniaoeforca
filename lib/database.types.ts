@@ -409,7 +409,9 @@ export type Database = {
           min_fee_cents: number
           name: string
           percentage_bps: number
+          withdrawal_fee_bps: number
           withdrawal_fee_cents: number
+          withdrawal_fee_min_cents: number
         }
         Insert: {
           active_from?: string
@@ -420,7 +422,9 @@ export type Database = {
           min_fee_cents?: number
           name: string
           percentage_bps?: number
+          withdrawal_fee_bps?: number
           withdrawal_fee_cents?: number
+          withdrawal_fee_min_cents?: number
         }
         Update: {
           active_from?: string
@@ -431,7 +435,9 @@ export type Database = {
           min_fee_cents?: number
           name?: string
           percentage_bps?: number
+          withdrawal_fee_bps?: number
           withdrawal_fee_cents?: number
+          withdrawal_fee_min_cents?: number
         }
         Relationships: []
       }
