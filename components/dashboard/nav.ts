@@ -26,7 +26,7 @@ export const PAINEL_NAV: NavItem[] = [
   { href: "/painel/carteira", label: "Carteira", icon: Wallet },
   { href: "/painel/saques", label: "Saques", icon: Banknote },
   { href: "/painel/kyc", label: "Verificação", icon: BadgeCheck },
-  { href: "/painel/perfil", label: "Perfil", icon: UserRound, soon: true },
+  { href: "/painel/perfil", label: "Perfil", icon: UserRound },
   { href: "/painel/seguranca", label: "Segurança", icon: ShieldCheck },
   { href: "/painel/privacidade", label: "Privacidade", icon: Lock },
 ];

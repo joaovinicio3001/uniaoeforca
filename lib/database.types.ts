@@ -745,6 +745,7 @@ export type Database = {
           address_number: string | null
           address_state: string | null
           address_street: string | null
+          avatar_url: string | null
           birth_date: string | null
           cep: string | null
           cpf_encrypted: string | null
@@ -755,6 +756,7 @@ export type Database = {
           full_name: string
           id: string
           marketing_opt_in: boolean
+          notify_campaign_activity: boolean
           phone: string | null
           status: string
           terms_accepted_at: string | null
@@ -767,6 +769,7 @@ export type Database = {
           address_number?: string | null
           address_state?: string | null
           address_street?: string | null
+          avatar_url?: string | null
           birth_date?: string | null
           cep?: string | null
           cpf_encrypted?: string | null
@@ -777,6 +780,7 @@ export type Database = {
           full_name: string
           id: string
           marketing_opt_in?: boolean
+          notify_campaign_activity?: boolean
           phone?: string | null
           status?: string
           terms_accepted_at?: string | null
@@ -789,6 +793,7 @@ export type Database = {
           address_number?: string | null
           address_state?: string | null
           address_street?: string | null
+          avatar_url?: string | null
           birth_date?: string | null
           cep?: string | null
           cpf_encrypted?: string | null
@@ -799,6 +804,7 @@ export type Database = {
           full_name?: string
           id?: string
           marketing_opt_in?: boolean
+          notify_campaign_activity?: boolean
           phone?: string | null
           status?: string
           terms_accepted_at?: string | null
