@@ -616,6 +616,7 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          emailed_at: string | null
           id: string
           payload: Json
           read_at: string | null
@@ -624,6 +625,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          emailed_at?: string | null
           id?: string
           payload?: Json
           read_at?: string | null
@@ -632,11 +634,36 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          emailed_at?: string | null
           id?: string
           payload?: Json
           read_at?: string | null
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      login_attempts: {
+        Row: {
+          fail_count: number
+          first_fail_at: string
+          identifier: string
+          last_fail_at: string
+          locked_until: string | null
+        }
+        Insert: {
+          fail_count?: number
+          first_fail_at?: string
+          identifier: string
+          last_fail_at?: string
+          locked_until?: string | null
+        }
+        Update: {
+          fail_count?: number
+          first_fail_at?: string
+          identifier?: string
+          last_fail_at?: string
+          locked_until?: string | null
         }
         Relationships: []
       }

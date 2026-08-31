@@ -8,6 +8,7 @@ import {
 
 import { createClient } from "@/lib/supabase/server";
 import { listMyDevices } from "@/lib/security/devices";
+import { getMfaStatus } from "@/lib/auth/mfa";
 import { formatDateTimeBR } from "@/lib/utils";
 import {
   CARD,
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { ChangePasswordForm } from "./change-password-form";
 import { AccountSessionsCard } from "./account-sessions-card";
 import { RecentDevices } from "./recent-devices";
+import { TwoFactorCard } from "@/components/security/two-factor-card";
 
 export const metadata: Metadata = { title: "Segurança da conta" };
 
@@ -51,7 +53,7 @@ export default async function SegurancaPage() {
     );
   }
 
-  const devices = await listMyDevices();
+  const [devices, mfa] = await Promise.all([listMyDevices(), getMfaStatus()]);
   const verified = !!user.email_confirmed_at;
 
   return (
@@ -103,6 +105,11 @@ export default async function SegurancaPage() {
           números e símbolos.
         </p>
         <ChangePasswordForm />
+      </SectionCard>
+
+      {/* Verificação em duas etapas */}
+      <SectionCard title="Verificação em duas etapas (2FA)">
+        <TwoFactorCard enrolled={mfa.enrolled} />
       </SectionCard>
 
       {/* Sessão da conta */}

@@ -16,7 +16,7 @@ import {
   requestWithdrawal,
   verifyPassword,
 } from "@/lib/withdrawals/service";
-import { recordIpSignal } from "@/lib/risk/signals";
+import { recordIpSignal, raiseRiskFlag } from "@/lib/risk/signals";
 import { hashCPF } from "@/lib/security/crypto";
 import type { WithdrawalFormState } from "@/lib/withdrawals/form-state";
 
@@ -69,8 +69,32 @@ export async function addPixKeyAction(
     };
   }
 
+  // Sinal de risco: trocar a chave de destino tendo campanha pública e já
+  // possuindo outra chave cadastrada.
+  const [{ count: keyCount }, { count: liveCount }] = await Promise.all([
+    admin
+      .from("pix_keys")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    admin
+      .from("campaigns")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_user_id", user.id)
+      .in("status", ["active", "completed"]),
+  ]);
+
   const res = await addPixKey({ userId: user.id, input: parsed.data });
   if (!res.ok) return { status: "error", message: res.error };
+
+  if ((keyCount ?? 0) > 0 && (liveCount ?? 0) > 0) {
+    await raiseRiskFlag({
+      type: "manual",
+      userId: user.id,
+      summary: "Usuário com campanha pública cadastrou nova chave PIX de saque",
+      details: { change: "new_pix_key" },
+    });
+  }
+
   revalidatePath("/painel/saques/chaves");
   return { status: "success", message: "Chave PIX cadastrada." };
 }

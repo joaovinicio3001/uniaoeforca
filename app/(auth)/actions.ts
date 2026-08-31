@@ -8,6 +8,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv, hasServiceRole } from "@/lib/env";
 import { writeAuditLog } from "@/lib/security/audit";
 import { recordSignupAcceptances } from "@/lib/legal/service";
+import {
+  checkLoginLock,
+  registerLoginFailure,
+  clearLoginFailures,
+} from "@/lib/security/lockout";
 import { recordIpSignal } from "@/lib/risk/signals";
 import { recordLoginDevice } from "@/lib/security/devices";
 import { hashCPF, cpfLast3 } from "@/lib/security/crypto";
@@ -309,6 +314,16 @@ export async function loginAction(
       ? (formData.get("redirect") as string)
       : "/painel";
 
+  const lock = await checkLoginLock(parsed.data.email);
+  if (lock.locked) {
+    return {
+      status: "error",
+      message: `Muitas tentativas incorretas. Tente novamente em ${Math.ceil(
+        lock.retryAfterSeconds / 60,
+      )} min ou redefina a senha.`,
+    };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
@@ -316,8 +331,11 @@ export async function loginAction(
   });
 
   if (error || !data.user) {
+    await registerLoginFailure(parsed.data.email);
     return { status: "error", message: "E-mail ou senha incorretos." };
   }
+
+  await clearLoginFailures(parsed.data.email);
 
   await writeAuditLog({
     actorUserId: data.user.id,
@@ -327,6 +345,73 @@ export async function loginAction(
   });
   await recordIpSignal(data.user.id);
   await recordLoginDevice(data.user.id, data.session?.access_token);
+
+  // 2FA: se a conta tem fator TOTP verificado, a sessão fica em aal1 até o
+  // desafio ser respondido.
+  const { data: aal } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal.currentLevel === "aal1") {
+    redirect(`/login/2fa?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+
+  redirect(redirectTo);
+}
+
+// ------------------------------------------------------------------
+// Desafio 2FA (TOTP) no login
+// ------------------------------------------------------------------
+export async function verifyLogin2faAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const ip = await clientIp();
+  const rl = rateLimit(`login-2fa:${ip}`, RATE_LIMITS.login);
+  if (!rl.ok) {
+    return {
+      status: "error",
+      message: `Muitas tentativas. Tente novamente em ${rl.retryAfterSeconds}s.`,
+    };
+  }
+
+  const code = String(formData.get("code") ?? "").replace(/\D/g, "");
+  const rawRedirect = String(formData.get("redirect") ?? "/painel");
+  const redirectTo =
+    rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/painel";
+
+  if (code.length !== 6) {
+    return { status: "error", message: "Digite o código de 6 dígitos." };
+  }
+
+  const supabase = await createClient();
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const factor = (factors?.totp ?? [])[0];
+  if (!factor) {
+    redirect(redirectTo);
+  }
+
+  const { data: challenge, error: cErr } = await supabase.auth.mfa.challenge({
+    factorId: factor!.id,
+  });
+  if (cErr || !challenge) {
+    return { status: "error", message: "Não foi possível validar agora. Tente de novo." };
+  }
+  const { data: verified, error: vErr } = await supabase.auth.mfa.verify({
+    factorId: factor!.id,
+    challengeId: challenge.id,
+    code,
+  });
+  if (vErr || !verified) {
+    return { status: "error", message: "Código incorreto. Tente novamente." };
+  }
+
+  await writeAuditLog({
+    actorUserId: verified.user?.id ?? null,
+    action: "auth.2fa_passed",
+    entityType: "user",
+    entityId: verified.user?.id ?? null,
+  });
 
   redirect(redirectTo);
 }

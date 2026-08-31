@@ -2,6 +2,7 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hasServiceRole } from "@/lib/env";
+import { flushNotificationEmails } from "@/lib/notifications/email";
 
 /** Cria uma notificação in-app para um usuário. Best-effort. */
 export async function notifyUser(
@@ -14,6 +15,7 @@ export async function notifyUser(
     await createAdminClient()
       .from("notifications")
       .insert({ user_id: userId, type, payload: payload as never });
+    await flushNotificationEmails({ userId, limit: 5 });
   } catch {
     /* ignore */
   }

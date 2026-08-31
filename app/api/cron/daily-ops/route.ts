@@ -5,6 +5,7 @@ import { serverEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { writeAuditLog } from "@/lib/security/audit";
 import { finalizeProcessingPayouts } from "@/lib/withdrawals/service";
+import { flushNotificationEmails } from "@/lib/notifications/email";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -38,6 +39,11 @@ export async function GET(request: NextRequest) {
     failed: 0,
   }));
 
+  // Rede de segurança dos e-mails de notificação gerados no banco.
+  const emails = await flushNotificationEmails({ limit: 200 }).catch(() => ({
+    sent: 0,
+  }));
+
   const slaList = (nearSla ?? []) as { id: string; requested_at: string }[];
   if (slaList.length > 0) {
     await writeAuditLog({
@@ -65,5 +71,6 @@ export async function GET(request: NextRequest) {
     expired_payments: expired ?? 0,
     withdrawals_near_sla: slaList.length,
     payouts_finalized: payouts,
+    notification_emails_sent: emails.sent,
   });
 }

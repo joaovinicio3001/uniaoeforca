@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { hasServiceRole } from "@/lib/env";
 import { writeAuditLog } from "@/lib/security/audit";
+import { raiseRiskFlag } from "@/lib/risk/signals";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { extForMime, getStorageProvider } from "@/lib/storage";
 import { updateProfileSchema } from "@/lib/validation/profile";
@@ -44,6 +47,12 @@ export async function updateProfileAction(
   // Cliente do usuário: a RLS `profiles_update_own` garante que só a própria
   // linha é afetada. Só colunas da allowlist são enviadas.
   const supabase = await createClient();
+  const { data: before } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("profiles")
     .update({
@@ -67,6 +76,29 @@ export async function updateProfileAction(
     entityType: "user",
     entityId: user.id,
   });
+
+  // Alteração de nome por quem já tem campanha pública = sinal de risco.
+  const nameChanged =
+    !!before?.full_name && before.full_name.trim() !== input.fullName.trim();
+  if (nameChanged && hasServiceRole()) {
+    const { count } = await createAdminClient()
+      .from("campaigns")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_user_id", user.id)
+      .in("status", ["active", "completed"]);
+    if ((count ?? 0) > 0) {
+      await raiseRiskFlag({
+        type: "manual",
+        userId: user.id,
+        summary: "Usuário com campanha pública alterou o nome do perfil",
+        details: {
+          change: "profile_name",
+          from: before?.full_name,
+          to: input.fullName,
+        },
+      });
+    }
+  }
 
   revalidatePath("/painel", "layout");
   revalidatePath("/painel/perfil");

@@ -66,6 +66,12 @@ export async function requireStaff(): Promise<SessionUser> {
   if (!canAccessArea(user.roles, "admin")) {
     redirect("/painel?erro=sem-permissao");
   }
+  // Se o staff ativou 2FA, o /admin exige a sessão em aal2.
+  const { getMfaStatus } = await import("@/lib/auth/mfa");
+  const mfa = await getMfaStatus();
+  if (mfa.needsChallenge) {
+    redirect("/login/2fa?redirect=/admin");
+  }
   return user;
 }
 
