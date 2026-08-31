@@ -19,6 +19,11 @@ import {
 export function ConfirmOtpForm() {
   const params = useSearchParams();
   const email = params.get("email") ?? "";
+  const rawRedirect = params.get("redirect") ?? "";
+  const redirectTo =
+    rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "";
   const [state, formAction] = useActionState(
     verifyEmailOtpAction,
     initialFormState,
@@ -50,6 +55,9 @@ export function ConfirmOtpForm() {
 
       <form action={formAction} className="space-y-4" noValidate>
         <input type="hidden" name="email" value={email} />
+        {redirectTo && (
+          <input type="hidden" name="redirect" value={redirectTo} />
+        )}
         <OtpField error={state.fieldErrors?.token?.[0]} />
         <AuthSubmit pendingText="Confirmando…" icon={CheckCircle2}>
           Confirmar e entrar

@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   IdCard,
   Mail,
@@ -33,6 +34,8 @@ function formatPhoneBR(value: string): string {
 
 export function RegisterForm() {
   const [state, formAction] = useActionState(registerAction, initialFormState);
+  const search = useSearchParams();
+  const redirectTo = search.get("redirect");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [fields, setFields] = useState({
@@ -77,6 +80,10 @@ export function RegisterForm() {
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
+      {redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//") && (
+        <input type="hidden" name="redirect" value={redirectTo} />
+      )}
+
       {state.status === "error" && state.duplicate && (
         <AuthAlert variant="warning">
           {state.message}{" "}

@@ -167,13 +167,20 @@ export async function registerAction(
     await recordSignupAcceptances(signUp.user.id, ip, ua);
   }
 
+  // Destino após concluir o cadastro (ex.: criação de campanha vinda da LP).
+  const rawNext = String(formData.get("redirect") ?? "");
+  const nextPath =
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/painel";
+
   // Confirmação de e-mail ativa → sem sessão ainda. Vai para a tela de
   // digitação do código de 6 dígitos.
   if (!signUp.session) {
-    redirect(`/cadastro/confirmar?email=${encodeURIComponent(data.email)}`);
+    const q = new URLSearchParams({ email: data.email });
+    if (nextPath !== "/painel") q.set("redirect", nextPath);
+    redirect(`/cadastro/confirmar?${q.toString()}`);
   }
 
-  redirect("/painel");
+  redirect(nextPath);
 }
 
 // ------------------------------------------------------------------
@@ -227,7 +234,10 @@ export async function verifyEmailOtpAction(
   await recordIpSignal(data.user.id);
   await recordLoginDevice(data.user.id, data.session?.access_token);
 
-  redirect("/painel");
+  const rawNext = String(formData.get("redirect") ?? "");
+  redirect(
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/painel",
+  );
 }
 
 export async function resendEmailOtpAction(

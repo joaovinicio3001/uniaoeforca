@@ -1,8 +1,17 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
+  // Subdomínio de anúncios (lp.uniaoeforca.com.br): a raiz serve a landing page
+  // de conversão, preservando a query (utm/fbclid/gclid).
+  const host = request.headers.get("host") ?? "";
+  if (host.startsWith("lp.") && request.nextUrl.pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/crie-sua-campanha";
+    return NextResponse.rewrite(url);
+  }
+
   return updateSession(request);
 }
 

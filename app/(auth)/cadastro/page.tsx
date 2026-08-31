@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { UserRoundPlus } from "lucide-react";
 
 import {
@@ -20,7 +21,9 @@ export default function CadastroPage() {
           subtitle="Leva menos de dois minutos. Você poderá criar campanhas e doar."
         />
         <div className="mt-6">
-          <RegisterForm />
+          <Suspense fallback={null}>
+            <RegisterForm />
+          </Suspense>
         </div>
       </AuthCard>
       <AuthSecurityNotice />
