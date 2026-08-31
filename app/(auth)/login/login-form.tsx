@@ -3,15 +3,16 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { LogIn, Mail } from "lucide-react";
 
 import { loginAction } from "@/app/(auth)/actions";
 import { initialFormState } from "@/app/(auth)/form-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FieldError } from "@/components/forms/field-error";
-import { SubmitButton } from "@/components/forms/submit-button";
-import { PasswordInput } from "@/components/forms/password-input";
+import {
+  AuthAlert,
+  AuthField,
+  AuthPasswordField,
+  AuthSubmit,
+} from "@/components/auth/auth-form-kit";
 
 export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, initialFormState);
@@ -20,71 +21,68 @@ export function LoginForm() {
   const linkError = params.get("erro");
 
   return (
-    <div className="space-y-4">
-      <form action={formAction} className="space-y-4" noValidate>
-        <input type="hidden" name="redirect" value={redirectTo} />
+    <form action={formAction} className="space-y-4" noValidate>
+      <input type="hidden" name="redirect" value={redirectTo} />
 
-        {linkError === "link-invalido" && (
-          <Alert variant="warning">
-            <AlertDescription>
-              O link não é mais válido. Faça login ou solicite um novo.
-            </AlertDescription>
-          </Alert>
-        )}
-
-      {state.status === "error" && state.message && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
+      {linkError === "link-invalido" && (
+        <AuthAlert variant="warning">
+          O link não é mais válido. Faça login ou{" "}
+          <Link href="/recuperar-senha">solicite um novo</Link>.
+        </AuthAlert>
       )}
 
-      <div>
-        <Label htmlFor="email">E-mail</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className="mt-1.5"
-        />
-        <FieldError errors={state.fieldErrors?.email} />
-      </div>
+      {state.status === "error" && state.message && (
+        <AuthAlert variant="error">{state.message}</AuthAlert>
+      )}
+
+      <AuthField
+        id="email"
+        name="email"
+        label="E-mail"
+        icon={Mail}
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        placeholder="seu@email.com"
+        required
+        error={state.fieldErrors?.email?.[0]}
+      />
 
       <div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Senha</Label>
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-sm font-semibold text-[#071D4A]">Senha</span>
           <Link
             href="/recuperar-senha"
-            className="text-xs text-primary hover:underline"
+            className="text-[13px] font-medium text-[#0645D8] hover:underline"
           >
             Esqueci minha senha
           </Link>
         </div>
-        <PasswordInput
+        <AuthPasswordField
           id="password"
           name="password"
+          label=""
+          aria-label="Senha"
           autoComplete="current-password"
+          placeholder="Sua senha"
           required
-          className="mt-1.5"
+          error={state.fieldErrors?.password?.[0]}
         />
-        <FieldError errors={state.fieldErrors?.password} />
       </div>
 
-      <SubmitButton className="w-full" pendingText="Entrando…">
+      <AuthSubmit pendingText="Entrando…" icon={LogIn}>
         Entrar
-      </SubmitButton>
+      </AuthSubmit>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Ainda não tem conta?{" "}
-          <Link
-            href="/cadastro"
-            className="font-medium text-primary hover:underline"
-          >
-            Criar conta
-          </Link>
-        </p>
-      </form>
-    </div>
+      <p className="pt-1 text-center text-sm text-[#5B6B88]">
+        Ainda não tem conta?{" "}
+        <Link
+          href="/cadastro"
+          className="font-semibold text-[#0645D8] hover:underline"
+        >
+          Criar conta
+        </Link>
+      </p>
+    </form>
   );
 }

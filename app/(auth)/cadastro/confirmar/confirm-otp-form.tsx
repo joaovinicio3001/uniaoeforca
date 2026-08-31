@@ -3,17 +3,18 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 
 import {
   resendEmailOtpAction,
   verifyEmailOtpAction,
 } from "@/app/(auth)/actions";
 import { initialFormState } from "@/app/(auth)/form-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FieldError } from "@/components/forms/field-error";
-import { SubmitButton } from "@/components/forms/submit-button";
+import {
+  AuthAlert,
+  AuthSubmit,
+  OtpField,
+} from "@/components/auth/auth-form-kit";
 
 export function ConfirmOtpForm() {
   const params = useSearchParams();
@@ -30,63 +31,47 @@ export function ConfirmOtpForm() {
   return (
     <div className="space-y-4">
       {email && (
-        <p className="text-sm text-muted-foreground">
-          Código enviado para <strong className="text-foreground">{email}</strong>
-          . Ele expira em 5 minutos.
+        <p className="text-sm text-[#5B6B88]">
+          Código enviado para{" "}
+          <strong className="font-semibold text-[#071D4A]">{email}</strong>. Ele
+          expira em 5 minutos.
         </p>
       )}
 
       {state.status === "error" && state.message && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
+        <AuthAlert variant="error">{state.message}</AuthAlert>
       )}
       {resendState.status === "success" && resendState.message && (
-        <Alert variant="success">
-          <AlertDescription>{resendState.message}</AlertDescription>
-        </Alert>
+        <AuthAlert variant="success">{resendState.message}</AuthAlert>
       )}
       {resendState.status === "error" && resendState.message && (
-        <Alert variant="warning">
-          <AlertDescription>{resendState.message}</AlertDescription>
-        </Alert>
+        <AuthAlert variant="warning">{resendState.message}</AuthAlert>
       )}
 
       <form action={formAction} className="space-y-4" noValidate>
         <input type="hidden" name="email" value={email} />
-        <div>
-          <Label htmlFor="token">Código de 6 dígitos</Label>
-          <Input
-            id="token"
-            name="token"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            required
-            placeholder="000000"
-            className="mt-1.5 text-center text-lg tracking-[0.5em]"
-          />
-          <FieldError errors={state.fieldErrors?.token} />
-        </div>
-
-        <SubmitButton className="w-full" pendingText="Confirmando…">
+        <OtpField error={state.fieldErrors?.token?.[0]} />
+        <AuthSubmit pendingText="Confirmando…" icon={CheckCircle2}>
           Confirmar e entrar
-        </SubmitButton>
+        </AuthSubmit>
       </form>
 
       <form action={resendAction} className="text-center">
         <input type="hidden" name="email" value={email} />
         <button
           type="submit"
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-sm font-medium text-[#0645D8] hover:underline"
         >
           Não recebeu? Reenviar código
         </button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-[#5B6B88]">
         E-mail errado?{" "}
-        <Link href="/cadastro" className="font-medium text-primary hover:underline">
+        <Link
+          href="/cadastro"
+          className="font-semibold text-[#0645D8] hover:underline"
+        >
           Voltar ao cadastro
         </Link>
       </p>

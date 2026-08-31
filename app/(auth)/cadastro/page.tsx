@@ -1,28 +1,29 @@
 import type { Metadata } from "next";
+import { UserRoundPlus } from "lucide-react";
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  AuthCard,
+  AuthHeader,
+  AuthSecurityNotice,
+} from "@/components/auth/auth-shell";
 import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = { title: "Criar conta" };
 
 export default function CadastroPage() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Criar sua conta</CardTitle>
-        <CardDescription>
-          Leva menos de dois minutos. Você poderá criar campanhas e doar.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <RegisterForm />
-      </CardContent>
-    </Card>
+    <>
+      <AuthCard>
+        <AuthHeader
+          icon={UserRoundPlus}
+          title="Criar sua conta"
+          subtitle="Leva menos de dois minutos. Você poderá criar campanhas e doar."
+        />
+        <div className="mt-6">
+          <RegisterForm />
+        </div>
+      </AuthCard>
+      <AuthSecurityNotice />
+    </>
   );
 }

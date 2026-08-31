@@ -1,65 +1,29 @@
-"use client";
+import type { Metadata } from "next";
+import { KeyRound } from "lucide-react";
 
-import { useActionState } from "react";
-import Link from "next/link";
-
-import { forgotPasswordAction } from "@/app/(auth)/actions";
-import { initialFormState } from "@/app/(auth)/form-state";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { SubmitButton } from "@/components/forms/submit-button";
+  AuthCard,
+  AuthHeader,
+  AuthSecurityNotice,
+} from "@/components/auth/auth-shell";
+import { ForgotPasswordForm } from "./forgot-form";
+
+export const metadata: Metadata = { title: "Recuperar senha" };
 
 export default function RecuperarSenhaPage() {
-  const [state, formAction] = useActionState(
-    forgotPasswordAction,
-    initialFormState,
-  );
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recuperar senha</CardTitle>
-        <CardDescription>
-          Informe seu e-mail e enviaremos um código de 6 dígitos para redefinir a
-          senha.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form action={formAction} className="space-y-4" noValidate>
-          {state.status === "error" && state.message && (
-            <Alert variant="destructive">
-              <AlertDescription>{state.message}</AlertDescription>
-            </Alert>
-          )}
-          <div>
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="mt-1.5"
-            />
-          </div>
-          <SubmitButton className="w-full" pendingText="Enviando…">
-            Enviar código
-          </SubmitButton>
-        </form>
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          <Link href="/login" className="text-primary hover:underline">
-            Voltar para o login
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+    <>
+      <AuthCard>
+        <AuthHeader
+          icon={KeyRound}
+          title="Esqueceu sua senha?"
+          subtitle="Não se preocupe. Informe o e-mail da sua conta e enviaremos as instruções para você criar uma nova senha."
+        />
+        <div className="mt-6">
+          <ForgotPasswordForm />
+        </div>
+      </AuthCard>
+      <AuthSecurityNotice />
+    </>
   );
 }

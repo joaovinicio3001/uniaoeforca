@@ -88,6 +88,16 @@
       font-size: 16px;
     }
   }
+
+  /* O autofill do Chrome/Safari não deve pintar o fundo dos campos. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    -webkit-background-clip: text;
+    caret-color: hsl(var(--foreground));
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }
 
 /* Conteúdo rico já sanitizado (história/atualizações de campanha). */
