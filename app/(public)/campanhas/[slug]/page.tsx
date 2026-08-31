@@ -60,6 +60,12 @@ export async function generateMetadata({
     cover = data?.public_url ?? undefined;
   }
 
+  // Sempre entrega uma imagem para o preview (WhatsApp/Facebook): capa da
+  // campanha ou o logotipo como fallback.
+  const ogImage = cover
+    ? { url: cover, alt: c.title }
+    : { url: "/logo-lockup.png", width: 1716, height: 829, alt: "União & Força" };
+
   return {
     title: c.title,
     description: desc,
@@ -70,13 +76,13 @@ export async function generateMetadata({
       description: desc,
       type: "article",
       url: `/campanhas/${c.slug}`,
-      images: cover ? [{ url: cover }] : undefined,
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: c.title,
       description: desc,
-      images: cover ? [cover] : undefined,
+      images: [ogImage.url],
     },
   };
 }
@@ -194,9 +200,12 @@ export default async function CampaignPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Users className="size-4" /> {c.supporters_count} apoiadores
-            </span>
+            {c.supporters_count > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Users className="size-4" /> {c.supporters_count}{" "}
+                {c.supporters_count === 1 ? "apoiador" : "apoiadores"}
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5">
               Por <strong className="font-medium text-foreground">{organizer.name}</strong>
               {organizer.verified && (
@@ -346,16 +355,36 @@ export default async function CampaignPage({
         {/* Sidebar de doação */}
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <div className="space-y-4 rounded-xl border bg-card p-5">
-            <div>
-              <p className="text-2xl font-bold">{formatBRL(c.raised_amount_cents)}</p>
-              <p className="text-sm text-muted-foreground">
-                arrecadados de {formatBRL(c.goal_amount_cents)} · {pct}%
-              </p>
-            </div>
-            <ProgressBar percent={pct} />
-            <p className="text-sm text-muted-foreground">
-              {c.supporters_count} {c.supporters_count === 1 ? "apoiador" : "apoiadores"}
-            </p>
+            {c.raised_amount_cents > 0 ? (
+              <>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {formatBRL(c.raised_amount_cents)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    arrecadados de {formatBRL(c.goal_amount_cents)} · {pct}%
+                  </p>
+                </div>
+                <ProgressBar percent={pct} />
+                <p className="text-sm text-muted-foreground">
+                  {c.supporters_count}{" "}
+                  {c.supporters_count === 1 ? "apoiador" : "apoiadores"}
+                </p>
+              </>
+            ) : (
+              <div>
+                <p className="text-lg font-bold text-[#071D4A]">
+                  Seja a primeira pessoa a apoiar
+                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Meta de {formatBRL(c.goal_amount_cents)}. Cada doação aproxima
+                  essa causa do objetivo.
+                </p>
+                <div className="mt-3">
+                  <ProgressBar percent={0} />
+                </div>
+              </div>
+            )}
 
             {c.status === "completed" ? (
               <div className="rounded-md bg-success/10 p-3 text-sm text-foreground">
