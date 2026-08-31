@@ -11,38 +11,11 @@ import {
 
 import { uploadKycDocAction } from "./actions";
 import { initialKycUploadState, type KycDocKind } from "@/lib/kyc/shared";
+import { downscaleImage } from "@/lib/images/downscale";
 import { cn } from "@/lib/utils";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const MAX_BYTES = 12 * 1024 * 1024;
-
-/** Reduz fotos grandes no navegador antes do upload → envio rápido. */
-async function downscaleImage(file: File): Promise<File> {
-  if (!file.type.startsWith("image/") || file.size < 900_000) return file;
-  try {
-    const bitmap = await createImageBitmap(file);
-    const maxSide = 1600;
-    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-    const w = Math.round(bitmap.width * scale);
-    const h = Math.round(bitmap.height * scale);
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return file;
-    ctx.drawImage(bitmap, 0, 0, w, h);
-    const blob = await new Promise<Blob | null>((res) =>
-      canvas.toBlob(res, "image/jpeg", 0.82),
-    );
-    bitmap.close?.();
-    if (!blob || blob.size >= file.size) return file;
-    return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", {
-      type: "image/jpeg",
-    });
-  } catch {
-    return file;
-  }
-}
 
 type Status = "idle" | "working" | "done" | "error";
 

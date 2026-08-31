@@ -16,6 +16,7 @@ import { PUBLIC_STATUSES } from "@/lib/campaigns/state-machine";
 import { formatBRL, formatDateTimeBR } from "@/lib/utils";
 import { publicEnv } from "@/lib/env";
 import { Button } from "@/components/ui/button";
+import { JsonLd } from "@/components/seo/json-ld";
 import { ProgressBar } from "@/components/campaigns/progress-bar";
 import { ShareButton } from "@/components/campaigns/share-button";
 import { ReportForm } from "./report-form";
@@ -29,18 +30,44 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const res = await getCampaignBySlug(slug);
-  if (res.kind !== "found") return { title: "Campanha não encontrada" };
+  if (res.kind !== "found") {
+    return { title: "Campanha não encontrada", robots: { index: false } };
+  }
   const c = res.campaign;
-  const desc = c.summary || toPlainText(c.story).slice(0, 155);
+  const desc = (c.summary || toPlainText(c.story).slice(0, 155)).trim();
+  const isPublic = PUBLIC_STATUSES.includes(
+    c.status as (typeof PUBLIC_STATUSES)[number],
+  );
+
+  let cover: string | undefined;
+  if (c.cover_media_id) {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("campaign_media")
+      .select("public_url")
+      .eq("id", c.cover_media_id)
+      .maybeSingle();
+    cover = data?.public_url ?? undefined;
+  }
+
   return {
     title: c.title,
     description: desc,
     alternates: { canonical: `/campanhas/${c.slug}` },
+    robots: isPublic ? undefined : { index: false, follow: true },
     openGraph: {
       title: c.title,
       description: desc,
       type: "article",
       url: `/campanhas/${c.slug}`,
+      images: cover ? [{ url: cover }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: c.title,
+      description: desc,
+      images: cover ? [cover] : undefined,
     },
   };
 }
@@ -80,8 +107,35 @@ export default async function CampaignPage({
         ? "apoiadores"
         : "historia";
 
+  const base = publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "");
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: c.title,
+    description: c.summary || toPlainText(c.story).slice(0, 200),
+    url: `${base}/campanhas/${c.slug}`,
+    inLanguage: "pt-BR",
+    image: cover?.public_url ? [cover.public_url] : undefined,
+    datePublished: c.published_at ?? undefined,
+    dateModified: c.updated_at,
+    isPartOf: { "@type": "WebSite", name: "União & Força", url: base },
+    about: {
+      "@type": "DonateAction",
+      name: `Doar para ${c.title}`,
+      recipient: { "@type": "Organization", name: "União & Força" },
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Campanhas", item: `${base}/campanhas` },
+        { "@type": "ListItem", position: 2, name: c.title, item: `${base}/campanhas/${c.slug}` },
+      ],
+    },
+  };
+
   return (
     <article className="container py-8">
+      <JsonLd data={jsonLd} />
       <nav className="mb-4 text-sm text-muted-foreground">
         <Link href="/campanhas" className="hover:text-foreground">
           Campanhas

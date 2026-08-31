@@ -42,10 +42,14 @@ const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
+  compress: true,
   experimental: {
     serverActions: { bodySizeLimit: "12mb" },
+    optimizePackageImports: ["lucide-react"],
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
     remotePatterns: [
       { protocol: "https", hostname: "*.b-cdn.net" },
       { protocol: "https", hostname: supabaseHost || "qmpsranxguyxxbplvcjf.supabase.co" },

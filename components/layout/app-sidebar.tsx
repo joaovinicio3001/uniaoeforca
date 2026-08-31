@@ -8,6 +8,7 @@ import {
   HandCoins,
   Wallet,
   Banknote,
+  Bell,
   UserRound,
   ShieldCheck,
   BadgeCheck,
@@ -49,6 +50,7 @@ const ADMIN_NAV: Item[] = [
   { href: "/admin/saques", label: "Saques", icon: Banknote },
   { href: "/admin/kyc", label: "KYC", icon: BadgeCheck },
   { href: "/admin/risco", label: "Risco", icon: ShieldAlert },
+  { href: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { href: "/admin/lgpd", label: "LGPD", icon: FileLock2 },
   { href: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck, soon: true },
 ];

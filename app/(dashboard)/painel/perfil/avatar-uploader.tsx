@@ -6,6 +6,7 @@ import { Loader2, Pencil } from "lucide-react";
 
 import { updateAvatarAction } from "./actions";
 import { initialProfileFormState } from "@/lib/profile/form-state";
+import { downscaleImage } from "@/lib/images/downscale";
 import { cn } from "@/lib/utils";
 
 function initials(name: string): string {
@@ -33,22 +34,27 @@ export function AvatarUploader({
 
   const shown = preview ?? url;
 
-  function onPick(file: File | undefined) {
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem precisa ter no máximo 5 MB.");
+  function onPick(raw: File | undefined) {
+    if (!raw) return;
+    if (raw.size > 15 * 1024 * 1024) {
+      toast.error("A imagem é muito grande.");
       return;
     }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(raw.type)) {
       toast.error("Formato inválido. Use JPG, PNG ou WebP.");
       return;
     }
-    const localUrl = URL.createObjectURL(file);
+    const localUrl = URL.createObjectURL(raw);
     setPreview(localUrl);
 
-    const fd = new FormData();
-    fd.set("avatar", file);
     start(async () => {
+      const file = await downscaleImage(raw, {
+        maxSide: 512,
+        quality: 0.85,
+        skipUnderBytes: 0,
+      });
+      const fd = new FormData();
+      fd.set("avatar", file);
       const res = await updateAvatarAction(initialProfileFormState, fd);
       URL.revokeObjectURL(localUrl);
       setPreview(null);

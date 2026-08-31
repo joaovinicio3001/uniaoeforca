@@ -25,6 +25,7 @@ import {
   saveWizardDraft,
   type WizardDraft,
 } from "@/lib/campaigns/wizard";
+import { downscaleImage } from "@/lib/images/downscale";
 import { WizardStepper } from "./wizard-stepper";
 import { WizardActions } from "./wizard-ui";
 import { StepBasics } from "./step-basics";
@@ -194,15 +195,16 @@ export function CampaignWizard({ categories }: { categories: Category[] }) {
   }, [step, draftId]);
 
   const uploadImage = useCallback(
-    async (file: File) => {
+    async (raw: File) => {
       if (!draftId) return;
       setImageError(undefined);
-      if (file.size > WIZARD_LIMITS.imageMaxBytes) {
+      if (raw.size > WIZARD_LIMITS.imageMaxBytes) {
         setImageError("Imagem acima de 5 MB.");
         return;
       }
       setUploading(true);
       try {
+        const file = await downscaleImage(raw, { maxSide: 1600, quality: 0.82 });
         const fd = new FormData();
         fd.set("campaignId", draftId);
         fd.set("file", file);

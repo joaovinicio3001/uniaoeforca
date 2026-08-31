@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hasServiceRole } from "@/lib/env";
@@ -101,7 +103,13 @@ export async function listPublicCampaigns(params: PublicListParams) {
 }
 
 /** Resolve slug atual ou redirect. Retorna { campaign } ou { redirectTo }. */
-export async function getCampaignBySlug(slug: string): Promise<
+/**
+ * `cache()` dedupa a chamada dentro do mesmo request — a página de campanha
+ * usa em `generateMetadata` e no corpo, então roda 1 query em vez de 2.
+ */
+export const getCampaignBySlug = cache(async function getCampaignBySlug(
+  slug: string,
+): Promise<
   | { kind: "found"; campaign: CampaignRow; category: CategoryRow | null }
   | { kind: "redirect"; to: string }
   | { kind: "not_found" }
@@ -141,7 +149,7 @@ export async function getCampaignBySlug(slug: string): Promise<
   }
 
   return { kind: "not_found" };
-}
+});
 
 export async function getCampaignMedia(
   campaignId: string,

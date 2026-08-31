@@ -9,9 +9,16 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Campanhas",
+  title: "Campanhas de arrecadação ativas",
   description:
-    "Explore campanhas de arrecadação ativas na União & Força e apoie uma causa.",
+    "Explore vaquinhas e campanhas de arrecadação ativas na União & Força e apoie uma causa com uma doação por PIX.",
+  alternates: { canonical: "/campanhas" },
+  openGraph: {
+    title: "Campanhas de arrecadação ativas · União & Força",
+    description:
+      "Explore vaquinhas e campanhas de arrecadação ativas e apoie uma causa por PIX.",
+    url: "/campanhas",
+  },
 };
 
 type SP = {

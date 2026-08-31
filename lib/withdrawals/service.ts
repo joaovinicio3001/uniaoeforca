@@ -208,13 +208,18 @@ export async function dispatchPayout(
     .maybeSingle();
   if (!key) return { ok: false, error: "Chave PIX não encontrada." };
 
+  const pixKeyValue = decryptSecret(key.value_encrypted);
   const provider = getPixOutProvider();
   let payout;
   try {
     payout = await provider.createPayout({
       amountCents: w.net_cents,
-      pixKey: decryptSecret(key.value_encrypted),
+      pixKey: pixKeyValue,
       pixKeyType: toProviderKeyType(key.type as PixKeyType),
+      // A chave é sempre o CPF do titular — informamos ao provedor para a
+      // validação de titularidade no PIX Out.
+      recipientDocument:
+        key.type === "cpf" ? pixKeyValue.replace(/\D/g, "") : undefined,
       externalId: w.id,
       description: `Saque União & Força ${w.id.slice(0, 8)}`,
       webhookUrl: webhookUrl(),

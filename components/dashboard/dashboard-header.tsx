@@ -1,12 +1,24 @@
 import Link from "next/link";
-import { Bell, ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { signOutAction } from "@/app/(auth)/actions";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
+import {
+  getUnreadNotificationCount,
+  listMyNotifications,
+} from "@/lib/notifications/queries";
+import { renderNotification } from "@/lib/notifications/render";
 
 /** Header do painel. Sticky, branco, com borda inferior. */
-export function DashboardHeader({ userName }: { userName: string }) {
+export async function DashboardHeader({ userName }: { userName: string }) {
+  const [count, rows] = await Promise.all([
+    getUnreadNotificationCount(),
+    listMyNotifications(10),
+  ]);
+  const items = rows.map(renderNotification);
+
   return (
     <header className="sticky top-0 z-40 border-b border-[#E7EDF6] bg-white">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 md:h-[88px] md:px-8">
@@ -28,13 +40,7 @@ export function DashboardHeader({ userName }: { userName: string }) {
             {userName}
             <ChevronDown className="size-4 text-[#5B6B88]" />
           </button>
-          <button
-            type="button"
-            aria-label="Notificações"
-            className="flex size-11 items-center justify-center rounded-[10px] border border-[#DCE5F2] bg-white text-[#17315C] transition-colors hover:bg-[#F5F8FE]"
-          >
-            <Bell className="size-5" />
-          </button>
+          <NotificationBell count={count} items={items} />
           <form action={signOutAction}>
             <button
               type="submit"
@@ -47,13 +53,7 @@ export function DashboardHeader({ userName }: { userName: string }) {
 
         {/* Mobile */}
         <div className="flex items-center gap-2 md:hidden">
-          <button
-            type="button"
-            aria-label="Notificações"
-            className="flex size-11 items-center justify-center rounded-[10px] border border-[#DCE5F2] bg-white text-[#17315C] transition-colors hover:bg-[#F5F8FE]"
-          >
-            <Bell className="size-5" />
-          </button>
+          <NotificationBell count={count} items={items} />
           <MobileNav userName={userName} />
         </div>
       </div>
