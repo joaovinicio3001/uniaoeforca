@@ -4,7 +4,7 @@ import { Logo } from "@/components/brand/logo";
 
 export function PublicFooter() {
   return (
-    <footer className="bg-brand-navy text-white">
+    <footer className="bg-[#063B63] text-white">
       <div className="container grid gap-8 py-12 md:grid-cols-4">
         <div className="space-y-3">
           <Logo variant="light" />

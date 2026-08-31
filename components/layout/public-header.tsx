@@ -36,8 +36,8 @@ export async function PublicHeader() {
   const user = await getSessionUser();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-card">
-      <div className="container flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 border-b border-[#E2E9F3] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <div className="container flex h-[72px] items-center justify-between gap-4">
         <Link href="/" aria-label="União & Força — início">
           <Logo />
         </Link>
@@ -82,8 +82,8 @@ export async function PublicHeader() {
             >
               <Menu className="size-5" />
             </summary>
-            <div className="fixed inset-x-0 top-16 z-50 border-t bg-card shadow-lg">
-              <div className="container max-h-[calc(100dvh-4rem)] overflow-y-auto py-2">
+            <div className="fixed inset-x-0 top-[72px] z-50 border-t bg-card shadow-lg">
+              <div className="container max-h-[calc(100dvh-72px)] overflow-y-auto py-2">
                 {GROUPS.map((g) => (
                   <details key={g.title} className="group/sub border-b">
                     <summary className="flex list-none cursor-pointer items-center justify-between py-4 text-sm font-medium [&::-webkit-details-marker]:hidden">
@@ -131,7 +131,7 @@ function Dropdown({ label, items }: { label: string; items: MenuLink[] }) {
     <div className="group relative">
       <button
         type="button"
-        className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground group-hover:text-foreground group-focus-within:text-foreground"
+        className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-[#344765] transition-colors hover:text-primary group-hover:text-primary group-focus-within:text-primary"
       >
         {label}
         <ChevronDown className="size-3.5 transition-transform group-hover:rotate-180" />

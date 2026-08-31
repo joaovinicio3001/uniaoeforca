@@ -28,7 +28,7 @@ export function CampaignCard({ c }: { c: CampaignCardData }) {
   return (
     <Link
       href={`/campanhas/${c.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-[#E2E9F3] bg-card shadow-[0_8px_25px_rgba(20,50,100,0.05)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_14px_32px_rgba(20,50,100,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="relative aspect-[16/9] bg-muted">
         {c.coverUrl ? (

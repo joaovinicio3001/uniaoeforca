@@ -9,33 +9,33 @@
  */
 @layer base {
   :root {
-    --background: 208 33% 97%;
-    --foreground: 206 42% 12%;
+    --background: 214 78% 98%;     /* #F7FAFE */
+    --foreground: 218 83% 16%;     /* #071D4A */
 
     --card: 0 0% 100%;
-    --card-foreground: 206 42% 12%;
+    --card-foreground: 218 83% 16%;
 
-    --primary: 206 90% 17%;         /* #042f50 Baleia Azul */
+    --primary: 221 95% 44%;        /* #0645D8 azul principal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 30% 93%;
-    --secondary-foreground: 206 42% 16%;
+    --secondary: 214 40% 94%;
+    --secondary-foreground: 218 55% 17%;
 
-    --success: 132 64% 41%;         /* #20af3d Verde Floresta */
+    --success: 133 68% 42%;        /* #23B64B verde */
     --success-foreground: 0 0% 100%;
 
-    --accent: 51 84% 49%;           /* #e3c518 Dicas de Ouro */
-    --accent-foreground: 206 55% 13%;
+    --accent: 50 100% 50%;         /* #FFD500 amarelo principal */
+    --accent-foreground: 218 62% 16%;
 
-    --muted: 210 28% 93%;
-    --muted-foreground: 208 14% 40%;
+    --muted: 214 32% 94%;
+    --muted-foreground: 218 20% 42%;
 
     --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 24% 87%;
-    --input: 210 24% 85%;
-    --ring: 216 95% 42%;            /* #0459d4 Azul da Ciência */
+    --border: 214 33% 91%;         /* #E2E9F3 */
+    --input: 214 30% 86%;
+    --ring: 221 95% 48%;
 
     --radius: 0.7rem;
   }
