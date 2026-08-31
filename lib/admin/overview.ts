@@ -19,6 +19,7 @@ export type AdminOverview = {
   riskOpen: number;
   reportsOpen: number;
   reconOpen: number;
+  supportOpen: number;
   ledgerImbalanced: number | null;
   usersTotal: number;
 };
@@ -40,6 +41,7 @@ export async function getAdminOverview(): Promise<AdminOverview | null> {
     riskOpen,
     reportsOpen,
     reconOpen,
+    supportOpen,
     usersTotal,
     imbalanced,
   ] = await Promise.all([
@@ -79,6 +81,10 @@ export async function getAdminOverview(): Promise<AdminOverview | null> {
       .from("reconciliation_items")
       .select("id", { count: "exact", head: true })
       .not("status", "in", "(resolved,matched)"),
+    admin
+      .from("support_tickets")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["open", "waiting_user"]),
     admin.from("profiles").select("id", { count: "exact", head: true }),
     admin
       .from("v_ledger_imbalanced")
@@ -122,6 +128,7 @@ export async function getAdminOverview(): Promise<AdminOverview | null> {
     riskOpen: riskOpen.count ?? 0,
     reportsOpen: reportsOpen.count ?? 0,
     reconOpen: reconOpen.count ?? 0,
+    supportOpen: supportOpen.count ?? 0,
     ledgerImbalanced: imbalanced.count ?? null,
     usersTotal: usersTotal.count ?? 0,
   };

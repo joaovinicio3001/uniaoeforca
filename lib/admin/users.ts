@@ -119,6 +119,7 @@ export type UserDossier = {
     reviewed_at: string | null;
     rejection_reason: string | null;
   } | null;
+  legal: { document: string; version: string; accepted_at: string }[];
   audit: {
     action: string;
     entity_type: string;
@@ -156,6 +157,7 @@ export async function getUserDossier(
     { data: balance },
     { data: withdrawals },
     { data: kycRows },
+    { data: legal },
     { data: audit },
   ] = await Promise.all([
     admin.auth.admin.getUserById(userId),
@@ -194,6 +196,11 @@ export async function getUserDossier(
       .order("created_at", { ascending: false })
       .limit(1),
     admin
+      .from("legal_acceptances")
+      .select("document, version, accepted_at")
+      .eq("user_id", userId)
+      .order("accepted_at", { ascending: false }),
+    admin
       .from("audit_logs")
       .select("action, entity_type, entity_id, created_at")
       .or(`actor_user_id.eq.${userId},entity_id.eq.${userId}`)
@@ -227,6 +234,7 @@ export async function getUserDossier(
     wallet: balance ?? null,
     withdrawals: withdrawals ?? [],
     kyc: kycRows?.[0] ?? null,
+    legal: legal ?? [],
     audit: audit ?? [],
   };
 }

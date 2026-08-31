@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { requireStaff } from "@/lib/auth/session";
 import { can } from "@/lib/auth/rbac";
@@ -82,7 +83,12 @@ export default async function AdminDoacoesPage() {
               {(recent ?? []).map((d) => (
                 <tr key={d.id}>
                   <td className="py-2 pr-2">
-                    {(d.campaigns as { title?: string } | null)?.title ?? "—"}
+                    <Link
+                      href={`/admin/doacoes/${d.id}`}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {(d.campaigns as { title?: string } | null)?.title ?? "—"}
+                    </Link>
                   </td>
                   <td className="tabular-nums">{formatBRL(d.gross_amount_cents)}</td>
                   <td className="tabular-nums">{formatBRL(d.platform_fee_cents)}</td>

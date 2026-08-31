@@ -265,6 +265,30 @@ export default async function AdminUsuarioDetalhePage({
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Aceites legais</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm">
+          {d.legal.length === 0 ? (
+            <p className="text-muted-foreground">Nenhum aceite registrado.</p>
+          ) : (
+            <ul className="divide-y">
+              {d.legal.map((l, i) => (
+                <li key={i} className="flex justify-between gap-2 py-1.5">
+                  <span className="capitalize">
+                    {l.document.replace("_", " ")}
+                  </span>
+                  <span className="text-muted-foreground">
+                    v{l.version} · {formatDateTimeBR(l.accepted_at)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Ações administrativas */}
       <Card>
         <CardHeader>

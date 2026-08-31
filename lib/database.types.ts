@@ -468,6 +468,36 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          document: string
+          id: string
+          ip: string | null
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          document: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          document?: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
       ledger_accounts: {
         Row: {
           code: string
@@ -976,6 +1006,36 @@ export type Database = {
           resolved_by?: string | null
           status?: Database["public"]["Enums"]["data_request_status"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      refunds: {
+        Row: {
+          actor_user_id: string | null
+          amount_cents: number
+          created_at: string
+          donation_id: string
+          id: string
+          provider_refunded: boolean
+          reason: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          amount_cents: number
+          created_at?: string
+          donation_id: string
+          id?: string
+          provider_refunded?: boolean
+          reason: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          amount_cents?: number
+          created_at?: string
+          donation_id?: string
+          id?: string
+          provider_refunded?: boolean
+          reason?: string
         }
         Relationships: []
       }
@@ -1519,6 +1579,74 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          category: Database["public"]["Enums"]["support_ticket_category"]
+          created_at: string
+          id: string
+          last_message_at: string
+          status: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["support_ticket_category"]
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["support_ticket_category"]
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_ticket_messages: {
+        Row: {
+          author_user_id: string
+          body: string
+          created_at: string
+          id: string
+          is_staff: boolean
+          ticket_id: string
+        }
+        Insert: {
+          author_user_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          ticket_id: string
+        }
+        Update: {
+          author_user_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_holds: {
         Row: {
           amount_cents: number
@@ -1663,6 +1791,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      refund_donation: {
+        Args: { p_actor: string; p_donation_id: string; p_reason: string }
+        Returns: Json
+      }
       place_wallet_hold: {
         Args: {
           p_actor: string
@@ -1798,6 +1930,15 @@ export type Database = {
         | "manual"
       risk_level: "low" | "medium" | "high"
       risk_severity: "info" | "warning" | "critical"
+      support_ticket_category:
+        | "duvida"
+        | "pagamento"
+        | "saque"
+        | "verificacao"
+        | "campanha"
+        | "denuncia"
+        | "outro"
+      support_ticket_status: "open" | "waiting_user" | "resolved" | "closed"
       withdrawal_status:
         | "requested"
         | "under_review"
@@ -1981,6 +2122,16 @@ export const Constants = {
       ],
       risk_level: ["low", "medium", "high"],
       risk_severity: ["info", "warning", "critical"],
+      support_ticket_category: [
+        "duvida",
+        "pagamento",
+        "saque",
+        "verificacao",
+        "campanha",
+        "denuncia",
+        "outro",
+      ],
+      support_ticket_status: ["open", "waiting_user", "resolved", "closed"],
       donation_status: [
         "created",
         "pending",

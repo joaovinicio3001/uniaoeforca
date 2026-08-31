@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv, hasServiceRole } from "@/lib/env";
 import { writeAuditLog } from "@/lib/security/audit";
+import { recordSignupAcceptances } from "@/lib/legal/service";
 import { recordIpSignal } from "@/lib/risk/signals";
 import { recordLoginDevice } from "@/lib/security/devices";
 import { hashCPF, cpfLast3 } from "@/lib/security/crypto";
@@ -155,6 +156,11 @@ export async function registerAction(
     entityId: signUp.user?.id ?? null,
     after: { email: data.email, marketing_opt_in: data.marketingOptIn },
   });
+
+  if (signUp.user?.id) {
+    const ua = (await headers()).get("user-agent");
+    await recordSignupAcceptances(signUp.user.id, ip, ua);
+  }
 
   // Confirmação de e-mail ativa → sem sessão ainda. Vai para a tela de
   // digitação do código de 6 dígitos.

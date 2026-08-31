@@ -84,6 +84,13 @@ export default async function AdminDashboardPage() {
       href: "/admin/conciliacao",
     });
   }
+  if (ov.supportOpen > 0) {
+    alerts.push({
+      tone: "warning",
+      text: `${ov.supportOpen} chamado(s) de suporte aguardando`,
+      href: "/admin/suporte",
+    });
+  }
 
   return (
     <div className="space-y-6">

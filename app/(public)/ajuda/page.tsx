@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   UserRoundCheck,
   Clock,
   Wallet,
   SearchCheck,
   UserRoundX,
+  LifeBuoy,
 } from "lucide-react";
 
 import { Accordion } from "@/components/ui/accordion";
@@ -123,16 +125,22 @@ export default function AjudaPage() {
       <div className="mt-10 rounded-2xl border bg-brand-surface p-6">
         <h2 className="text-lg font-bold">Ainda precisa de ajuda?</h2>
         <p className="mt-2 text-muted-foreground">
-          Se não encontrou a resposta que procurava, entre em contato com nossa
-          equipe pelo e-mail{" "}
+          Se você tem conta, abra um chamado e acompanhe a resposta da equipe
+          direto no painel. Também respondemos pelo e-mail{" "}
           <a
             href="mailto:suporte@uniaoeforca.com.br"
             className="font-medium text-primary underline"
           >
             suporte@uniaoeforca.com.br
           </a>
-          . Responderemos assim que possível.
+          .
         </p>
+        <Link
+          href="/painel/suporte/novo"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+        >
+          <LifeBuoy className="size-4" /> Abrir um chamado
+        </Link>
       </div>
     </div>
   );

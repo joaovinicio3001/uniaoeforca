@@ -18,6 +18,7 @@ import {
   FileLock2,
   FileBarChart,
   Settings,
+  LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +41,7 @@ const USER_NAV: Item[] = [
   { href: "/painel/perfil", label: "Perfil", icon: UserRound, soon: true },
   { href: "/painel/seguranca", label: "Segurança", icon: ShieldCheck },
   { href: "/painel/privacidade", label: "Privacidade", icon: Lock },
+  { href: "/painel/suporte", label: "Suporte", icon: LifeBuoy },
 ];
 
 const ADMIN_NAV: Item[] = [
@@ -52,6 +54,7 @@ const ADMIN_NAV: Item[] = [
   { href: "/admin/saques", label: "Saques", icon: Banknote },
   { href: "/admin/kyc", label: "KYC", icon: BadgeCheck },
   { href: "/admin/risco", label: "Risco", icon: ShieldAlert },
+  { href: "/admin/suporte", label: "Suporte", icon: LifeBuoy },
   { href: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
   { href: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },

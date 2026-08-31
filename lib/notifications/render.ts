@@ -177,6 +177,30 @@ export function renderNotification(n: NotificationRow): NotificationView {
         tone: "green",
       };
 
+    case "donation_refunded":
+      return {
+        ...base,
+        title: "Doação estornada",
+        body: `Uma doação de ${cents(d.amount_cents)} foi estornada${
+          str(d.reason) ? `: ${str(d.reason)}` : "."
+        }`,
+        href: d.campaign_id
+          ? `/painel/campanhas/${d.campaign_id}?aba=doacoes`
+          : "/painel",
+        tone: "amber",
+      };
+
+    case "support_reply":
+      return {
+        ...base,
+        title: "Resposta no seu chamado",
+        body: "A equipe de suporte respondeu. Toque para ver.",
+        href: d.ticket_id
+          ? `/painel/suporte/${d.ticket_id}`
+          : "/painel/suporte",
+        tone: "blue",
+      };
+
     case "admin_message":
       return {
         ...base,
