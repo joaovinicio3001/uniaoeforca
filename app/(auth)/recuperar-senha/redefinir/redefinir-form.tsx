@@ -35,7 +35,8 @@ export function RedefinirForm() {
       {email && (
         <p className="text-sm text-muted-foreground">
           Código enviado para{" "}
-          <strong className="text-foreground">{email}</strong>.
+          <strong className="text-foreground">{email}</strong>. Ele expira em 5
+          minutos.
         </p>
       )}
 

@@ -13,6 +13,23 @@ import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { cn } from "@/lib/utils";
 
+/** Máscara de moeda BRL: acumula centavos da direita para a esquerda. */
+function maskBRL(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  return (Number(digits) / 100).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function centsToLabel(c: number): string {
+  return (c / 100).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export function DonationForm({
   slug,
   defaultName,
@@ -41,7 +58,7 @@ export function DonationForm({
         <Label>Valor da doação</Label>
         <div className="mt-2 grid grid-cols-3 gap-2">
           {PRESET_AMOUNTS_CENTS.map((c) => {
-            const label = (c / 100).toFixed(2).replace(".", ",");
+            const label = centsToLabel(c);
             const active = amount === label;
             return (
               <button
@@ -64,15 +81,21 @@ export function DonationForm({
           <Label htmlFor="amount" className="text-xs text-muted-foreground">
             ou outro valor (R$)
           </Label>
-          <Input
-            id="amount"
-            name="amount"
-            inputMode="decimal"
-            required
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="mt-1"
-          />
+          <div className="relative mt-1">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              R$
+            </span>
+            <Input
+              id="amount"
+              name="amount"
+              inputMode="numeric"
+              required
+              value={amount}
+              onChange={(e) => setAmount(maskBRL(e.target.value))}
+              className="pl-9"
+              placeholder="0,00"
+            />
+          </div>
           <FieldError errors={state.fieldErrors?.amount} />
         </div>
       </div>

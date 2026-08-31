@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { MapPin, Users, Share2, HeartHandshake } from "lucide-react";
+import { MapPin, Users, HeartHandshake } from "lucide-react";
 
 import {
   getCampaignBySlug,
@@ -14,8 +14,10 @@ import {
 import { toPlainText } from "@/lib/campaigns/sanitize";
 import { PUBLIC_STATUSES } from "@/lib/campaigns/state-machine";
 import { formatBRL, formatDateTimeBR } from "@/lib/utils";
+import { publicEnv } from "@/lib/env";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/campaigns/progress-bar";
+import { ShareButton } from "@/components/campaigns/share-button";
 import { ReportForm } from "./report-form";
 
 type Params = { slug: string };
@@ -128,9 +130,6 @@ export default async function CampaignPage({
                 <MapPin className="size-4" />
                 {[c.city, c.state].filter(Boolean).join(" · ")}
               </span>
-            )}
-            {c.published_at && (
-              <span>Publicada em {formatDateTimeBR(c.published_at)}</span>
             )}
           </div>
 
@@ -284,17 +283,10 @@ export default async function CampaignPage({
               </Button>
             )}
 
-            <Button asChild variant="outline" className="w-full">
-              <Link
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                  `Apoie: ${c.title}`,
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Share2 className="size-4" /> Compartilhar
-              </Link>
-            </Button>
+            <ShareButton
+              url={`${publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "")}/campanhas/${c.slug}`}
+              title={c.title}
+            />
           </div>
         </aside>
       </div>

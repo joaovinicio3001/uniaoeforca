@@ -29,6 +29,8 @@ export function PaymentView({
 }: Props) {
   const [status, setStatus] = useState(initialStatus);
   const [copied, setCopied] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [checkedEmpty, setCheckedEmpty] = useState(false);
   const stop = useRef(false);
 
   const poll = useCallback(async () => {
@@ -69,6 +71,14 @@ export function PaymentView({
     } catch {
       /* clipboard indisponível */
     }
+  };
+
+  const checkNow = async () => {
+    setChecking(true);
+    setCheckedEmpty(false);
+    const s = await poll();
+    setChecking(false);
+    if (!s || !TERMINAL.includes(s)) setCheckedEmpty(true);
   };
 
   if (status === "paid") {
@@ -142,6 +152,28 @@ export function PaymentView({
           </Button>
         </div>
       </div>
+
+      <Button
+        type="button"
+        className="w-full"
+        onClick={checkNow}
+        disabled={checking}
+      >
+        {checking ? (
+          <>
+            <Loader2 className="size-4 animate-spin" /> Verificando…
+          </>
+        ) : (
+          "Já paguei — confirmar agora"
+        )}
+      </Button>
+
+      {checkedEmpty && (
+        <p className="text-center text-xs text-accent-foreground">
+          Ainda não identificamos o pagamento. Se você acabou de pagar, aguarde
+          alguns segundos e tente de novo.
+        </p>
+      )}
 
       <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="size-4 animate-spin" />

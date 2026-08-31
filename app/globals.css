@@ -79,6 +79,15 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Evita o zoom automático do iOS ao focar um campo: precisa de >= 16px. */
+  @media (max-width: 640px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
 }
 
 /* Conteúdo rico já sanitizado (história/atualizações de campanha). */

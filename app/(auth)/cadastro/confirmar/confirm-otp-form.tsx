@@ -32,7 +32,7 @@ export function ConfirmOtpForm() {
       {email && (
         <p className="text-sm text-muted-foreground">
           Código enviado para <strong className="text-foreground">{email}</strong>
-          .
+          . Ele expira em 5 minutos.
         </p>
       )}
 
