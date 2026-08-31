@@ -54,6 +54,9 @@ export async function requireUser(redirectTo = "/painel"): Promise<SessionUser> 
   if (!user) {
     redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
   }
+  if (user.profileStatus === "blocked") {
+    redirect("/conta-bloqueada");
+  }
   return user;
 }
 

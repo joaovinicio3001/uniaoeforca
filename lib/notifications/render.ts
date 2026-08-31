@@ -158,6 +158,25 @@ export function renderNotification(n: NotificationRow): NotificationView {
         tone: "blue",
       };
 
+    case "account_blocked":
+      return {
+        ...base,
+        title: "Conta bloqueada",
+        body: str(d.reason)
+          ? `Motivo: ${str(d.reason)}. Fale com o suporte para revisão.`
+          : "O acesso à sua conta foi suspenso. Fale com o suporte para revisão.",
+        href: null,
+        tone: "red",
+      };
+    case "account_unblocked":
+      return {
+        ...base,
+        title: "Conta reativada",
+        body: "O acesso à sua conta foi restabelecido.",
+        href: "/painel",
+        tone: "green",
+      };
+
     case "admin_message":
       return {
         ...base,

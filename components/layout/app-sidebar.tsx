@@ -16,6 +16,8 @@ import {
   Scale,
   Lock,
   FileLock2,
+  FileBarChart,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -42,7 +44,7 @@ const USER_NAV: Item[] = [
 
 const ADMIN_NAV: Item[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/usuarios", label: "Usuários", icon: UserRound, soon: true },
+  { href: "/admin/usuarios", label: "Usuários", icon: UserRound },
   { href: "/admin/campanhas", label: "Campanhas", icon: Megaphone },
   { href: "/admin/doacoes", label: "Doações", icon: HandCoins },
   { href: "/admin/financeiro", label: "Financeiro", icon: Wallet },
@@ -50,7 +52,9 @@ const ADMIN_NAV: Item[] = [
   { href: "/admin/saques", label: "Saques", icon: Banknote },
   { href: "/admin/kyc", label: "KYC", icon: BadgeCheck },
   { href: "/admin/risco", label: "Risco", icon: ShieldAlert },
+  { href: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
   { href: "/admin/notificacoes", label: "Notificações", icon: Bell },
+  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
   { href: "/admin/lgpd", label: "LGPD", icon: FileLock2 },
   { href: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck, soon: true },
 ];

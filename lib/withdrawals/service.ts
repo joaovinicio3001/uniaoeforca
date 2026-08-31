@@ -4,6 +4,7 @@ import { createClient as createSbClient } from "@supabase/supabase-js";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv, serverEnv } from "@/lib/env";
+import { getNumberSetting } from "@/lib/settings/service";
 import { writeAuditLog } from "@/lib/security/audit";
 import { encryptSecret, decryptSecret, hashSecret } from "@/lib/security/crypto";
 import { getPixOutProvider } from "@/lib/payments/pixout";
@@ -107,14 +108,29 @@ export async function requestWithdrawal(params: {
 }> {
   const env = serverEnv();
   const admin = createAdminClient();
+
+  // Parâmetros vêm de app_settings (editável no /admin/configuracoes) com
+  // fallback para as variáveis de ambiente.
+  const [minCents, cooldownHours, dailyMaxCents] = await Promise.all([
+    getNumberSetting("withdrawal_min_cents", env.WITHDRAWAL_MIN_CENTS),
+    getNumberSetting(
+      "withdrawal_pix_key_cooldown_hours",
+      env.WITHDRAWAL_PIX_KEY_COOLDOWN_HOURS,
+    ),
+    getNumberSetting(
+      "withdrawal_daily_max_cents",
+      env.WITHDRAWAL_DAILY_MAX_CENTS,
+    ),
+  ]);
+
   const { data, error } = await admin.rpc("request_withdrawal", {
     p_user_id: params.userId,
     p_pix_key_id: params.pixKeyId,
     p_amount_cents: params.amountCents,
     p_campaign_id: params.campaignId ?? undefined,
-    p_cooldown_hours: env.WITHDRAWAL_PIX_KEY_COOLDOWN_HOURS,
-    p_daily_max_cents: env.WITHDRAWAL_DAILY_MAX_CENTS,
-    p_min_cents: env.WITHDRAWAL_MIN_CENTS,
+    p_cooldown_hours: cooldownHours,
+    p_daily_max_cents: dailyMaxCents,
+    p_min_cents: minCents,
     p_max_cents: env.WITHDRAWAL_MAX_CENTS,
     p_enhanced_kyc_cents: env.KYC_ENHANCED_THRESHOLD_CENTS,
   });
