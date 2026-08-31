@@ -311,13 +311,21 @@ export async function getCampaignOrganizer(
       .limit(1),
   ]);
 
-  const raw =
-    profile?.display_name?.trim() || profile?.full_name?.trim() || "Responsável";
-  // Mostra só o primeiro nome + inicial do sobrenome (privacidade).
-  const parts = raw.split(/\s+/).filter(Boolean);
-  const first = parts[0] ?? "Responsável";
-  const last = parts.length > 1 ? parts[parts.length - 1] : "";
-  const name = last ? `${first} ${last.charAt(0).toUpperCase()}.` : first;
+  // O nome de exibição é escolhido pelo usuário e já é público — mostra
+  // como está (ex.: nome de uma organização). Só o nome legal (full_name) é
+  // abreviado para "Primeiro S." por privacidade.
+  const display = profile?.display_name?.trim();
+  let name: string;
+  if (display) {
+    name = display;
+  } else {
+    const parts = (profile?.full_name?.trim() || "Responsável")
+      .split(/\s+/)
+      .filter(Boolean);
+    const first = parts[0] ?? "Responsável";
+    const last = parts.length > 1 ? parts[parts.length - 1] : "";
+    name = last ? `${first} ${last.charAt(0).toUpperCase()}.` : first;
+  }
 
   return { name, verified: (kyc ?? []).length > 0 };
 }
