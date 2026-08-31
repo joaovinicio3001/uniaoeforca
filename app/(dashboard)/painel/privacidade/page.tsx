@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download } from "lucide-react";
+import { ArrowRight, Info } from "lucide-react";
 
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DeleteAccountButton } from "./delete-button";
+import { CARD, PageHeader } from "@/components/dashboard/ui";
+import { cn } from "@/lib/utils";
+import { DataExportCard } from "./data-export-card";
+import { DeleteAccountCard } from "./delete-account-card";
 
 export const metadata: Metadata = { title: "Privacidade e dados" };
 
@@ -28,48 +23,46 @@ export default async function PrivacidadePainelPage() {
     .maybeSingle();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Privacidade e dados</h1>
-        <p className="text-muted-foreground">
-          Seus direitos como titular de dados (LGPD). Veja também a{" "}
-          <Link href="/privacidade" className="text-primary hover:underline">
-            Política de Privacidade
-          </Link>
-          .
+    <div className="mx-auto max-w-5xl space-y-6">
+      <PageHeader
+        title="Privacidade e dados"
+        subtitle={
+          <>
+            Seus direitos como titular de dados (LGPD). Veja também a{" "}
+            <Link
+              href="/privacidade"
+              className="font-medium text-[#0645D8] hover:underline"
+            >
+              Política de Privacidade
+            </Link>
+            .
+          </>
+        }
+      />
+
+      <DataExportCard />
+
+      <DeleteAccountCard pending={!!pendingReq} />
+
+      <div
+        className={cn(
+          CARD,
+          "flex flex-col gap-3 border-[#DCE8FF] bg-[#F4F8FF] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5",
+        )}
+      >
+        <p className="flex items-start gap-2.5 text-sm leading-relaxed text-[#1B3A70]">
+          <Info className="mt-0.5 size-4 shrink-0 text-[#0645D8]" />
+          Em conformidade com a LGPD, você pode acessar, corrigir, exportar ou
+          pedir a exclusão dos seus dados pessoais, respeitadas as exceções
+          legais aplicáveis.
         </p>
+        <Link
+          href="/privacidade"
+          className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#0645D8] hover:underline"
+        >
+          Política de Privacidade <ArrowRight className="size-4" />
+        </Link>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Baixar meus dados</CardTitle>
-          <CardDescription>
-            Exporta um arquivo JSON com seu cadastro, campanhas, contribuições,
-            saques e verificações.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild size="sm" variant="outline">
-            <a href="/api/me/export" download>
-              <Download className="size-4" /> Baixar (JSON)
-            </a>
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Excluir minha conta</CardTitle>
-          <CardDescription>
-            Removemos seus dados pessoais e anonimizamos os registros que a lei
-            exige manter (financeiros/fiscais). A conta é bloqueada
-            imediatamente após o processamento.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DeleteAccountButton pending={!!pendingReq} />
-        </CardContent>
-      </Card>
     </div>
   );
 }
