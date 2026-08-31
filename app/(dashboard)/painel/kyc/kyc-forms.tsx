@@ -1,178 +1,129 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CheckCircle2, Lock, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Loader2, Lock, Send } from "lucide-react";
 
-import { submitBasicKycAction, submitEnhancedKycAction } from "./actions";
-import { initialKycFormState } from "@/lib/kyc/form-state";
-import { FieldError } from "@/components/forms/field-error";
-import { SubmitButton } from "@/components/forms/submit-button";
+import { finalizeKycAction, startKycAction } from "./actions";
+import { KYC_REQUIRED_KINDS, type KycDocKind } from "@/lib/kyc/shared";
 import { DocumentUploader } from "./document-uploader";
 
-const fieldBase =
-  "h-11 w-full rounded-[11px] border border-[#DFE7F2] bg-white px-3.5 text-[16px] text-[#071D4A] outline-none transition-shadow placeholder:text-[#9AA8BF] focus:border-[#0645D8] focus:shadow-[0_0_0_3px_rgba(6,69,216,0.10)]";
-const labelBase = "mb-1.5 block text-sm font-semibold text-[#071D4A]";
+const LABELS: Record<KycDocKind, string> = {
+  id_front: "Documento — frente",
+  id_back: "Documento — verso",
+  selfie: "Selfie segurando o documento",
+};
 
-/* ------------------------------------------------------------------ *
- * 1. Dados pessoais
- * ------------------------------------------------------------------ */
-export function BasicKycForm() {
-  const [state, action] = useActionState(
-    submitBasicKycAction,
-    initialKycFormState,
-  );
-  const last = useRef(state.status);
-
-  useEffect(() => {
-    if (state.status === last.current) return;
-    last.current = state.status;
-    if (state.status === "success") toast.success(state.message ?? "Dados confirmados.");
-    else if (state.status === "error" && state.message) toast.error(state.message);
-  }, [state]);
-
-  return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_260px]">
-      <form action={action} className="space-y-4" noValidate>
-        {state.status === "error" && state.message && (
-          <div className="rounded-[12px] border border-[#FFCFC9] bg-[#FFF1F0] px-3.5 py-3 text-sm text-[#8A1B12]">
-            {state.message}
-          </div>
-        )}
-        {(state.status === "success" || state.status === "review") &&
-          state.message && (
-            <div
-              className={
-                state.status === "success"
-                  ? "rounded-[12px] border border-[#B8E9C9] bg-[#ECF9F0] px-3.5 py-3 text-sm text-[#12622E]"
-                  : "rounded-[12px] border border-[#FBE1A8] bg-[#FFF8DF] px-3.5 py-3 text-sm text-[#7A5312]"
-              }
-            >
-              {state.message}
-            </div>
-          )}
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="fullName" className={labelBase}>
-              Nome completo (como no documento)
-            </label>
-            <input
-              id="fullName"
-              name="fullName"
-              required
-              maxLength={120}
-              placeholder="Digite seu nome completo"
-              autoComplete="name"
-              className={fieldBase}
-            />
-            <FieldError errors={state.fieldErrors?.fullName} />
-          </div>
-          <div>
-            <label htmlFor="birthDate" className={labelBase}>
-              Data de nascimento
-            </label>
-            <input
-              id="birthDate"
-              name="birthDate"
-              type="date"
-              required
-              className={fieldBase}
-            />
-            <FieldError errors={state.fieldErrors?.birthDate} />
-          </div>
-        </div>
-
-        <SubmitButton
-          className="h-11 rounded-[11px] bg-[#0645D8] px-5 font-semibold hover:bg-[#0B4FE5]"
-          pendingText="Verificando…"
-        >
-          Confirmar dados
-        </SubmitButton>
-      </form>
-
-      <aside className="rounded-[14px] border border-[#DCE8FF] bg-[#EDF4FF] p-5">
-        <ShieldCheck className="size-8 text-[#0645D8]" />
-        <p className="mt-3 text-sm font-bold text-[#071D4A]">
-          Suas informações ficam seguras
-        </p>
-        <p className="mt-1 text-[13px] leading-relaxed text-[#5B6B88]">
-          Usamos medidas de segurança para proteger seus dados pessoais durante
-          o processo de verificação.
-        </p>
-      </aside>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ *
- * 2. Documento com foto
- * ------------------------------------------------------------------ */
 const TIPS = [
-  {
-    title: "Documento válido e legível",
-    text: "Evite fotos cortadas ou imagens desfocadas.",
-  },
-  {
-    title: "Boa iluminação",
-    text: "Ambiente claro, sem reflexos ou sombras.",
-  },
-  {
-    title: "Selfie nítida",
-    text: "Mostre seu rosto e o documento com clareza.",
-  },
+  { title: "Documento legível", text: "Sem cortes, reflexos ou fotos tremidas." },
+  { title: "Boa iluminação", text: "Ambiente claro, sem sombra sobre o documento." },
+  { title: "Selfie nítida", text: "Seu rosto e o documento juntos, bem visíveis." },
 ];
 
-export function EnhancedKycForm() {
-  const [state, action] = useActionState(
-    submitEnhancedKycAction,
-    initialKycFormState,
-  );
-  const last = useRef(state.status);
+export function DocumentVerification() {
+  const router = useRouter();
+  const [caseId, setCaseId] = useState<string | null>(null);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
+  const [uploaded, setUploaded] = useState<Set<KycDocKind>>(new Set());
+  const [pending, start] = useTransition();
 
   useEffect(() => {
-    if (state.status === last.current) return;
-    last.current = state.status;
-    if (state.status === "review") toast.success(state.message ?? "Documentos enviados.");
-    else if (state.status === "error" && state.message) toast.error(state.message);
-  }, [state]);
+    let alive = true;
+    startKycAction()
+      .then((res) => {
+        if (!alive) return;
+        if (res.ok && res.caseId) {
+          setCaseId(res.caseId);
+        } else if (res.already) {
+          router.refresh();
+        } else {
+          setLoadErr(res.message ?? "Não foi possível iniciar a verificação.");
+        }
+      })
+      .catch(() => alive && setLoadErr("Não foi possível iniciar a verificação."));
+    return () => {
+      alive = false;
+    };
+  }, [router]);
+
+  const allDone = KYC_REQUIRED_KINDS.every((k) => uploaded.has(k));
+
+  function submit() {
+    if (!caseId || !allDone) return;
+    const fd = new FormData();
+    fd.set("caseId", caseId);
+    start(async () => {
+      const res = await finalizeKycAction(fd);
+      if (res.ok) {
+        toast.success(res.message);
+        router.refresh();
+      } else {
+        toast.error(res.message);
+      }
+    });
+  }
+
+  if (loadErr) {
+    return (
+      <div className="rounded-[12px] border border-[#FFCFC9] bg-[#FFF1F0] px-3.5 py-3 text-sm text-[#8A1B12]">
+        {loadErr}
+      </div>
+    );
+  }
+
+  if (!caseId) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-[#5B6B88]">
+        <Loader2 className="size-4 animate-spin" /> Preparando…
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_260px]">
-      <form action={action} className="space-y-4" noValidate>
-        {state.status === "error" && state.message && (
-          <div className="rounded-[12px] border border-[#FFCFC9] bg-[#FFF1F0] px-3.5 py-3 text-sm text-[#8A1B12]">
-            {state.message}
-          </div>
-        )}
-        {state.status === "review" && state.message && (
-          <div className="rounded-[12px] border border-[#FBE1A8] bg-[#FFF8DF] px-3.5 py-3 text-sm text-[#7A5312]">
-            {state.message}
-          </div>
-        )}
-
+      <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-3">
-          <DocumentUploader name="id_front" label="Documento — frente" />
-          <DocumentUploader name="id_back" label="Documento — verso" optional />
-          <DocumentUploader
-            name="selfie"
-            label="Selfie segurando o documento"
-          />
+          {KYC_REQUIRED_KINDS.map((kind) => (
+            <DocumentUploader
+              key={kind}
+              caseId={caseId}
+              kind={kind}
+              label={LABELS[kind]}
+              done={uploaded.has(kind)}
+              onUploaded={(kinds) => setUploaded(new Set(kinds))}
+            />
+          ))}
         </div>
 
         <div className="flex items-start gap-2.5 rounded-[12px] border border-[#DFE7F2] bg-[#F7FAFD] px-3.5 py-3 text-[13px] text-[#5B6B88]">
           <Lock className="mt-0.5 size-4 shrink-0 text-[#5B6B88]" />
-          Seus documentos ficam armazenados em ambiente protegido e o acesso é
-          restrito ao processo de verificação.
+          Seus documentos ficam em ambiente protegido, com acesso restrito à
+          equipe de verificação.
         </div>
 
-        <SubmitButton
-          className="h-11 rounded-[11px] bg-[#0645D8] px-5 font-semibold hover:bg-[#0B4FE5]"
-          pendingText="Enviando…"
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!allDone || pending}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-[11px] bg-[#0645D8] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0B4FE5] disabled:cursor-not-allowed disabled:opacity-60 max-sm:w-full"
         >
-          Enviar documentos
-        </SubmitButton>
-      </form>
+          {pending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" /> Enviando…
+            </>
+          ) : (
+            <>
+              <Send className="size-4" /> Enviar documentos
+            </>
+          )}
+        </button>
+        {!allDone && (
+          <p className="text-[12px] text-[#5B6B88]">
+            Envie os 3 arquivos (frente, verso e selfie) para concluir.
+          </p>
+        )}
+      </div>
 
       <aside className="rounded-[14px] border border-[#C7ECD5] bg-[#ECF9F0] p-5">
         <p className="text-sm font-bold text-[#071D4A]">

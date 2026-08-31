@@ -17,6 +17,7 @@ import {
   verifyPassword,
 } from "@/lib/withdrawals/service";
 import { recordIpSignal } from "@/lib/risk/signals";
+import { hashCPF } from "@/lib/security/crypto";
 import type { WithdrawalFormState } from "@/lib/withdrawals/form-state";
 
 function zErr(e: { issues: { path: (string | number)[]; message: string }[] }) {
@@ -42,6 +43,32 @@ export async function addPixKeyAction(
       fieldErrors: zErr(parsed.error),
     };
   }
+
+  // Regra de segurança: o saque só pode ir para o CPF do titular da conta.
+  // Portanto a única chave aceita é a chave PIX do tipo CPF, e ela precisa ser
+  // exatamente o CPF cadastrado.
+  if (parsed.data.type !== "cpf") {
+    return {
+      status: "error",
+      message:
+        "Só aceitamos chave PIX do tipo CPF, e ela precisa ser o CPF cadastrado na sua conta.",
+      fieldErrors: { type: ["Escolha o tipo CPF."] },
+    };
+  }
+  const admin = createAdminClient();
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("cpf_hash")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!profile?.cpf_hash || profile.cpf_hash !== hashCPF(parsed.data.value)) {
+    return {
+      status: "error",
+      message: "A chave PIX precisa ser o mesmo CPF cadastrado na sua conta.",
+      fieldErrors: { value: ["Use o CPF cadastrado na sua conta."] },
+    };
+  }
+
   const res = await addPixKey({ userId: user.id, input: parsed.data });
   if (!res.ok) return { status: "error", message: res.error };
   revalidatePath("/painel/saques/chaves");

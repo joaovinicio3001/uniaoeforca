@@ -1,105 +1,143 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CloudUpload, FileText, X } from "lucide-react";
+import {
+  CheckCircle2,
+  CloudUpload,
+  FileText,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
 
+import { uploadKycDocAction } from "./actions";
+import { initialKycUploadState, type KycDocKind } from "@/lib/kyc/shared";
 import { cn } from "@/lib/utils";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 12 * 1024 * 1024;
 
-function fmtSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+/** Reduz fotos grandes no navegador antes do upload → envio rápido. */
+async function downscaleImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.size < 900_000) return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const blob = await new Promise<Blob | null>((res) =>
+      canvas.toBlob(res, "image/jpeg", 0.82),
+    );
+    bitmap.close?.();
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", {
+      type: "image/jpeg",
+    });
+  } catch {
+    return file;
+  }
 }
 
+type Status = "idle" | "working" | "done" | "error";
+
 export function DocumentUploader({
-  name,
+  caseId,
+  kind,
   label,
-  optional = false,
+  done: initialDone,
+  onUploaded,
 }: {
-  name: string;
+  caseId: string;
+  kind: KycDocKind;
   label: string;
-  optional?: boolean;
+  done: boolean;
+  onUploaded: (kinds: KycDocKind[]) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>(initialDone ? "done" : "idle");
+  const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  function apply(f: File | null) {
+  async function handleFile(raw: File | undefined) {
+    if (!raw) return;
     setError(null);
-    if (preview) URL.revokeObjectURL(preview);
-    if (!f) {
-      setFile(null);
-      setPreview(null);
+    if (raw.size > MAX_BYTES) {
+      setStatus("error");
+      setError("Arquivo acima de 12 MB.");
       return;
     }
-    if (f.size > MAX_BYTES) {
-      setError("Arquivo acima de 10 MB.");
-      return;
-    }
-    if (!ACCEPT.split(",").includes(f.type)) {
+    if (!ACCEPT.split(",").includes(raw.type)) {
+      setStatus("error");
       setError("Formato inválido. Use JPG, PNG, WEBP ou PDF.");
       return;
     }
-    setFile(f);
-    setPreview(f.type.startsWith("image/") ? URL.createObjectURL(f) : null);
-  }
 
-  function clear() {
-    apply(null);
-    if (inputRef.current) inputRef.current.value = "";
+    setStatus("working");
+    setFileName(raw.name);
+    try {
+      const file = await downscaleImage(raw);
+      const fd = new FormData();
+      fd.set("caseId", caseId);
+      fd.set("kind", kind);
+      fd.set("file", file);
+      const res = await uploadKycDocAction(initialKycUploadState, fd);
+      if (res.status === "success") {
+        setStatus("done");
+        onUploaded(res.kinds ?? []);
+      } else {
+        setStatus("error");
+        setError(res.message ?? "Não foi possível enviar este arquivo.");
+      }
+    } catch {
+      setStatus("error");
+      setError("Não foi possível enviar este arquivo. Tente novamente.");
+    } finally {
+      if (inputRef.current) inputRef.current.value = "";
+    }
   }
 
   return (
     <div>
       <p className="mb-1.5 text-sm font-semibold text-[#071D4A]">
         {label}
-        {optional && (
-          <span className="ml-1 font-normal text-[#5B6B88]">(opcional)</span>
-        )}
+        <span className="ml-1 text-[#D92D20]">*</span>
       </p>
 
-      {file ? (
-        <div className="flex items-center gap-3 rounded-[12px] border border-[#DFE7F2] bg-white p-3">
-          {preview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={preview}
-              alt=""
-              className="size-12 shrink-0 rounded-[8px] object-cover"
-            />
-          ) : (
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-[8px] bg-[#EDF4FF] text-[#0645D8]">
-              <FileText className="size-5" />
-            </span>
-          )}
+      {status === "done" ? (
+        <div className="flex items-center gap-3 rounded-[12px] border border-[#C7ECD5] bg-[#F3FCF6] p-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[#ECF9F0] text-[#20B85A]">
+            <CheckCircle2 className="size-5" />
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-[#071D4A]">
-              {file.name}
-            </p>
-            <p className="text-[12px] text-[#5B6B88]">
-              {fmtSize(file.size)} · pronto para envio
-            </p>
+            <p className="text-sm font-semibold text-[#12622E]">Enviado</p>
+            {fileName && (
+              <p className="truncate text-[12px] text-[#5B6B88]">{fileName}</p>
+            )}
           </div>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="rounded-md px-2 py-1 text-[13px] font-semibold text-[#0645D8] hover:bg-[#EDF4FF]"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-semibold text-[#0645D8] hover:bg-[#EDF4FF]"
           >
-            Trocar
+            <RefreshCw className="size-3.5" /> Trocar
           </button>
-          <button
-            type="button"
-            onClick={clear}
-            aria-label="Remover arquivo"
-            className="flex size-8 items-center justify-center rounded-md text-[#D92D20] hover:bg-[#FEECEA]"
-          >
-            <X className="size-4" />
-          </button>
+        </div>
+      ) : status === "working" ? (
+        <div className="flex items-center gap-3 rounded-[12px] border border-[#DFE7F2] bg-white p-3">
+          <Loader2 className="size-5 shrink-0 animate-spin text-[#0645D8]" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-[#071D4A]">Enviando…</p>
+            {fileName && (
+              <p className="truncate text-[12px] text-[#5B6B88]">{fileName}</p>
+            )}
+          </div>
         </div>
       ) : (
         <button
@@ -113,21 +151,27 @@ export function DocumentUploader({
           onDrop={(e) => {
             e.preventDefault();
             setDragOver(false);
-            apply(e.dataTransfer.files[0] ?? null);
+            void handleFile(e.dataTransfer.files[0]);
           }}
           className={cn(
             "flex w-full flex-col items-center gap-1 rounded-[12px] border-2 border-dashed px-4 py-6 text-center transition-colors",
-            dragOver
-              ? "border-[#0645D8] bg-[#EDF4FF]"
-              : "border-[#C6D2E4] bg-[#F7FAFD] hover:border-[#9FBCEC]",
+            status === "error"
+              ? "border-[#F3C0BA] bg-[#FFF5F4]"
+              : dragOver
+                ? "border-[#0645D8] bg-[#EDF4FF]"
+                : "border-[#C6D2E4] bg-[#F7FAFD] hover:border-[#9FBCEC]",
           )}
         >
-          <CloudUpload className="size-6 text-[#0645D8]" />
+          {status === "error" ? (
+            <FileText className="size-6 text-[#D92D20]" />
+          ) : (
+            <CloudUpload className="size-6 text-[#0645D8]" />
+          )}
           <span className="mt-1 text-[13px] font-medium text-[#071D4A]">
-            Clique para enviar ou arraste seu arquivo aqui
+            Clique para enviar ou arraste o arquivo
           </span>
           <span className="text-[12px] text-[#5B6B88]">
-            JPG, PNG, WEBP ou PDF · até 10 MB
+            JPG, PNG, WEBP ou PDF · até 12 MB
           </span>
         </button>
       )}
@@ -135,9 +179,9 @@ export function DocumentUploader({
       <input
         ref={inputRef}
         type="file"
-        name={name}
         accept={ACCEPT}
-        onChange={(e) => apply(e.target.files?.[0] ?? null)}
+        capture="environment"
+        onChange={(e) => void handleFile(e.target.files?.[0])}
         className="sr-only"
         aria-label={label}
       />

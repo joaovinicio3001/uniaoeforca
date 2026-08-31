@@ -32,6 +32,9 @@ export default async function AdminKycReviewPage({
   if (!data) notFound();
 
   const { kycCase: kc, profile, documents } = data;
+  // Verificação por documento: nada é digitado pelo usuário aqui — confira o
+  // cadastro contra as fotos.
+  const docOnly = !kc.full_name_submitted && !kc.birth_date_submitted;
   const nameMatch =
     (kc.full_name_submitted ?? "").trim().toLowerCase() ===
     (profile?.full_name ?? "").trim().toLowerCase();
@@ -73,9 +76,22 @@ export default async function AdminKycReviewPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Dados enviados × cadastro</CardTitle>
+          <CardTitle>
+            {docOnly ? "Cadastro do usuário" : "Dados enviados × cadastro"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
+          {docOnly ? (
+            <>
+              <Cmp label="Nome (cadastro)" a={profile?.full_name ?? "—"} ok />
+              <Cmp
+                label="Nascimento (cadastro)"
+                a={profile?.birth_date ?? "—"}
+                ok
+              />
+            </>
+          ) : (
+          <>
           <Cmp label="Nome (enviado)" a={kc.full_name_submitted ?? "—"} ok={nameMatch} />
           <Cmp label="Nome (cadastro)" a={profile?.full_name ?? "—"} ok={nameMatch} />
           <Cmp
@@ -88,6 +104,8 @@ export default async function AdminKycReviewPage({
             a={profile?.birth_date ?? "—"}
             ok={dobMatch}
           />
+          </>
+          )}
           <div className="rounded-lg border p-3">
             <p className="text-xs text-muted-foreground">CPF (cadastro)</p>
             <p className="font-medium">•••.{profile?.cpf_last3 ?? "???"}</p>

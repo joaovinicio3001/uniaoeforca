@@ -1,24 +1,25 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { UserRound } from "lucide-react";
+import { IdCard } from "lucide-react";
 
 import { addPixKeyAction } from "../actions";
 import { initialWithdrawalFormState } from "@/lib/withdrawals/form-state";
-import { PIX_KEY_TYPE_LABEL } from "@/lib/withdrawals/pix-keys";
+import { formatCPF } from "@/lib/validation/cpf";
 import { FieldError } from "@/components/forms/field-error";
 import { SubmitButton } from "@/components/forms/submit-button";
 
 const fieldBase =
-  "h-11 w-full rounded-[11px] border border-[#DFE7F2] bg-white px-3.5 text-[15px] text-[#071D4A] outline-none transition-shadow placeholder:text-[#9AA8BF] focus:border-[#0645D8] focus:shadow-[0_0_0_3px_rgba(6,69,216,0.10)]";
+  "h-11 w-full rounded-[11px] border border-[#DFE7F2] bg-white px-3.5 text-[16px] text-[#071D4A] outline-none transition-shadow placeholder:text-[#9AA8BF] focus:border-[#0645D8] focus:shadow-[0_0_0_3px_rgba(6,69,216,0.10)]";
 
-export function PixKeyForm() {
+export function PixKeyForm({ cpfLast3 }: { cpfLast3: string | null }) {
   const [state, formAction] = useActionState(
     addPixKeyAction,
     initialWithdrawalFormState,
   );
   const formRef = useRef<HTMLFormElement>(null);
+  const [cpf, setCpf] = useState("");
   const lastStatus = useRef(state.status);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export function PixKeyForm() {
     if (state.status === "success") {
       toast.success(state.message ?? "Chave PIX cadastrada.");
       formRef.current?.reset();
+      setCpf("");
     } else if (state.status === "error" && state.message) {
       toast.error(state.message);
     }
@@ -34,49 +36,42 @@ export function PixKeyForm() {
 
   return (
     <form ref={formRef} action={formAction} className="space-y-4" noValidate>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label
-            htmlFor="type"
-            className="mb-1.5 block text-sm font-semibold text-[#071D4A]"
-          >
-            Tipo de chave
-          </label>
-          <select
-            id="type"
-            name="type"
-            required
-            defaultValue=""
-            className={fieldBase}
-          >
-            <option value="" disabled>
-              Selecione o tipo
-            </option>
-            {Object.entries(PIX_KEY_TYPE_LABEL).map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-          <FieldError errors={state.fieldErrors?.type} />
-        </div>
-        <div>
-          <label
-            htmlFor="value"
-            className="mb-1.5 block text-sm font-semibold text-[#071D4A]"
-          >
-            Chave PIX
-          </label>
+      <input type="hidden" name="type" value="cpf" />
+
+      <div>
+        <label
+          htmlFor="value"
+          className="mb-1.5 block text-sm font-semibold text-[#071D4A]"
+        >
+          Chave PIX (CPF)
+        </label>
+        <div
+          className={
+            "flex items-center rounded-[11px] border bg-white transition-shadow focus-within:border-[#0645D8] focus-within:shadow-[0_0_0_3px_rgba(6,69,216,0.10)] " +
+            (state.fieldErrors?.value ? "border-[#D92D20]" : "border-[#DFE7F2]")
+          }
+        >
+          <IdCard className="ml-3.5 size-[18px] shrink-0 text-[#5B6B88]" />
           <input
             id="value"
             name="value"
+            inputMode="numeric"
+            autoComplete="off"
             required
-            maxLength={140}
-            placeholder="Digite sua chave PIX"
-            className={fieldBase}
+            maxLength={14}
+            value={cpf}
+            onChange={(e) => setCpf(formatCPF(e.target.value))}
+            placeholder="000.000.000-00"
+            className="h-11 w-full min-w-0 rounded-[11px] bg-transparent px-3 text-[16px] text-[#071D4A] outline-none placeholder:text-[#9AA8BF]"
           />
-          <FieldError errors={state.fieldErrors?.value} />
         </div>
+        <p className="mt-1.5 text-[12px] text-[#5B6B88]">
+          Por segurança, o saque só vai para o CPF cadastrado na sua conta
+          {cpfLast3 ? ` (final ${cpfLast3})` : ""}. Só aceitamos chave PIX do
+          tipo CPF.
+        </p>
+        <FieldError errors={state.fieldErrors?.value} />
+        <FieldError errors={state.fieldErrors?.type} />
       </div>
 
       <div>
@@ -86,16 +81,13 @@ export function PixKeyForm() {
         >
           Nome do titular (opcional)
         </label>
-        <div className="flex items-center rounded-[11px] border border-[#DFE7F2] bg-white focus-within:border-[#0645D8] focus-within:shadow-[0_0_0_3px_rgba(6,69,216,0.10)]">
-          <UserRound className="ml-3.5 size-[18px] shrink-0 text-[#5B6B88]" />
-          <input
-            id="ownerName"
-            name="ownerName"
-            maxLength={120}
-            placeholder="Como consta no banco"
-            className="h-11 w-full min-w-0 rounded-[11px] bg-transparent px-3 text-[15px] text-[#071D4A] outline-none placeholder:text-[#9AA8BF]"
-          />
-        </div>
+        <input
+          id="ownerName"
+          name="ownerName"
+          maxLength={120}
+          placeholder="Como consta no banco"
+          className={fieldBase}
+        />
       </div>
 
       <SubmitButton

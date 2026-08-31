@@ -30,14 +30,16 @@ export async function getMyKycSummary(): Promise<KycSummary> {
 
   const cases = data ?? [];
   const now = Date.now();
-  const isValid = (c: KycCase, level: "basic" | "enhanced") =>
-    c.level === level &&
+  const isApproved = (c: KycCase) =>
     c.status === "approved" &&
     (!c.expires_at || new Date(c.expires_at).getTime() > now);
+  const hasEnhanced = cases.some((c) => c.level === "enhanced" && isApproved(c));
 
+  // Verificação virou só documento (enhanced). Um enhanced aprovado já satisfaz
+  // o requisito "básico" usado no fluxo de saque — alinhado a private.kyc_summary_for.
   return {
-    hasBasic: cases.some((c) => isValid(c, "basic")),
-    hasEnhanced: cases.some((c) => isValid(c, "enhanced")),
+    hasBasic: hasEnhanced || cases.some((c) => isApproved(c)),
+    hasEnhanced,
     latestStatus: cases[0]?.status ?? null,
     latestCase: cases[0] ?? null,
   };

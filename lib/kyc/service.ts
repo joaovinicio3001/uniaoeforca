@@ -4,6 +4,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { writeAuditLog } from "@/lib/security/audit";
 import { extForMime } from "@/lib/storage";
 import { sendEmail } from "@/lib/email/resend";
+import {
+  KYC_ACCEPT_MIME,
+  KYC_MAX_DOC_BYTES,
+  KYC_REQUIRED_KINDS,
+  type KycDocKind,
+} from "@/lib/kyc/shared";
+
+export { KYC_REQUIRED_KINDS, type KycDocKind };
 
 export type SubmitBasicResult =
   | { ok: true; status: string; autoApproved: boolean }
@@ -42,57 +50,182 @@ export async function submitBasicKyc(params: {
   };
 }
 
-const KYC_MIME = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-const MAX_DOC_BYTES = 10 * 1024 * 1024;
+const KYC_MIME: readonly string[] = KYC_ACCEPT_MIME;
+const MAX_DOC_BYTES = KYC_MAX_DOC_BYTES;
 
-export async function submitEnhancedKyc(params: {
-  userId: string;
-  files: { kind: "id_front" | "id_back" | "selfie"; file: File }[];
-}): Promise<{ ok: boolean; error?: string; caseId?: string }> {
+/**
+ * Caso ENHANCED "rascunho" (status `not_started`) do usuário — onde os
+ * documentos vão sendo anexados um a um antes do envio. Não aparece na fila do
+ * admin (que só lista `pending`/`in_review`).
+ */
+export async function getOrCreateDraftEnhancedCase(
+  userId: string,
+): Promise<{ ok: true; caseId: string } | { ok: false; error: string }> {
   const admin = createAdminClient();
 
-  for (const { file } of params.files) {
-    if (file.size === 0 || file.size > MAX_DOC_BYTES) {
-      return { ok: false, error: "Arquivo vazio ou acima de 10 MB." };
-    }
-    if (!KYC_MIME.includes(file.type)) {
-      return { ok: false, error: "Formato inválido. Use JPG, PNG, WebP ou PDF." };
-    }
+  // Já tem enhanced aprovado ou em análise? Nada a fazer aqui.
+  const { data: active } = await admin
+    .from("kyc_cases")
+    .select("id, status")
+    .eq("user_id", userId)
+    .eq("level", "enhanced")
+    .in("status", ["pending", "in_review", "approved"])
+    .maybeSingle();
+  if (active) {
+    return { ok: false, error: `already:${active.status}` };
   }
 
-  const { data: kc, error } = await admin
+  const { data: draft } = await admin
     .from("kyc_cases")
-    .insert({ user_id: params.userId, level: "enhanced", status: "pending" })
+    .select("id")
+    .eq("user_id", userId)
+    .eq("level", "enhanced")
+    .eq("status", "not_started")
+    .order("created_at", { ascending: false })
+    .maybeSingle();
+  if (draft) return { ok: true, caseId: draft.id };
+
+  const { data: created, error } = await admin
+    .from("kyc_cases")
+    .insert({ user_id: userId, level: "enhanced", status: "not_started" })
     .select("id")
     .single();
-  if (error || !kc) return { ok: false, error: "Não foi possível abrir o caso." };
+  if (error || !created) {
+    return { ok: false, error: "Não foi possível iniciar a verificação." };
+  }
+  return { ok: true, caseId: created.id };
+}
 
-  for (const { kind, file } of params.files) {
-    const ext =
-      file.type === "application/pdf" ? "pdf" : (extForMime(file.type) ?? "bin");
-    const key = `${params.userId}/${kc.id}/${kind}.${ext}`;
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const { error: upErr } = await admin.storage
-      .from("kyc-docs")
-      .upload(key, Buffer.from(bytes), { contentType: file.type, upsert: true });
-    if (upErr) {
-      return { ok: false, error: "Falha no upload dos documentos." };
-    }
-    await admin.from("kyc_documents").insert({
-      kyc_case_id: kc.id,
-      kind,
-      storage_key: key,
-      byte_size: file.size,
-    });
+async function assertOwnedDraft(
+  userId: string,
+  caseId: string,
+): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("kyc_cases")
+    .select("user_id, level, status")
+    .eq("id", caseId)
+    .maybeSingle();
+  return (
+    !!data &&
+    data.user_id === userId &&
+    data.level === "enhanced" &&
+    data.status === "not_started"
+  );
+}
+
+/** Envia UM documento do caso rascunho. Rápido: um arquivo por request. */
+export async function uploadKycDoc(params: {
+  userId: string;
+  caseId: string;
+  kind: KycDocKind;
+  file: unknown;
+}): Promise<{ ok: boolean; error?: string; kinds?: KycDocKind[] }> {
+  const { userId, caseId, kind } = params;
+  const file = params.file;
+
+  if (!KYC_REQUIRED_KINDS.includes(kind)) {
+    return { ok: false, error: "Documento inválido." };
+  }
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Selecione um arquivo." };
+  }
+  if (file.size > MAX_DOC_BYTES) {
+    return { ok: false, error: "Arquivo acima de 12 MB." };
+  }
+  if (!KYC_MIME.includes(file.type)) {
+    return { ok: false, error: "Formato inválido. Use JPG, PNG, WEBP ou PDF." };
+  }
+  if (!(await assertOwnedDraft(userId, caseId))) {
+    return { ok: false, error: "Verificação inválida." };
   }
 
+  const admin = createAdminClient();
+  const ext =
+    file.type === "application/pdf" ? "pdf" : (extForMime(file.type) ?? "bin");
+  const key = `${userId}/${caseId}/${kind}.${ext}`;
+  const bytes = Buffer.from(await file.arrayBuffer());
+
+  const { error: upErr } = await admin.storage
+    .from("kyc-docs")
+    .upload(key, bytes, { contentType: file.type, upsert: true });
+  if (upErr) {
+    return { ok: false, error: "Não foi possível enviar este arquivo." };
+  }
+
+  await admin
+    .from("kyc_documents")
+    .delete()
+    .eq("kyc_case_id", caseId)
+    .eq("kind", kind);
+  await admin.from("kyc_documents").insert({
+    kyc_case_id: caseId,
+    kind,
+    storage_key: key,
+    byte_size: file.size,
+  });
+
+  const { data: docs } = await admin
+    .from("kyc_documents")
+    .select("kind")
+    .eq("kyc_case_id", caseId);
+  return {
+    ok: true,
+    kinds: (docs ?? []).map((d) => d.kind as KycDocKind),
+  };
+}
+
+/** Finaliza: exige os 3 documentos, coloca em análise, notifica e envia e-mail. */
+export async function finalizeEnhancedKyc(params: {
+  userId: string;
+  caseId: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const { userId, caseId } = params;
+  const admin = createAdminClient();
+
+  if (!(await assertOwnedDraft(userId, caseId))) {
+    return { ok: false, error: "Verificação inválida ou já enviada." };
+  }
+
+  const { data: docs } = await admin
+    .from("kyc_documents")
+    .select("kind")
+    .eq("kyc_case_id", caseId);
+  const have = new Set((docs ?? []).map((d) => d.kind));
+  const missing = KYC_REQUIRED_KINDS.filter((k) => !have.has(k));
+  if (missing.length > 0) {
+    return {
+      ok: false,
+      error: "Envie a frente e o verso do documento e a selfie.",
+    };
+  }
+
+  const { error } = await admin
+    .from("kyc_cases")
+    .update({ status: "pending", submitted_at: new Date().toISOString() })
+    .eq("id", caseId);
+  if (error) {
+    return { ok: false, error: "Não foi possível enviar. Tente novamente." };
+  }
+
+  await admin.from("notifications").insert({
+    user_id: userId,
+    type: "kyc_submitted",
+    payload: { level: "enhanced" },
+  });
   await writeAuditLog({
-    actorUserId: params.userId,
+    actorUserId: userId,
     action: "kyc.submitted_enhanced",
     entityType: "kyc_case",
-    entityId: kc.id,
+    entityId: caseId,
   });
-  return { ok: true, caseId: kc.id };
+  await sendEmail({
+    userId,
+    subject: "Recebemos seus documentos — conta em análise",
+    text: "Recebemos os documentos da sua verificação de identidade. Nossa equipe vai analisar e você receberá um retorno em breve, por e-mail e nas notificações do painel.",
+  });
+
+  return { ok: true };
 }
 
 // ---------- admin ----------

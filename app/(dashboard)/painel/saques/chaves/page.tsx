@@ -5,6 +5,8 @@ import { ArrowLeft, KeyRound } from "lucide-react";
 import { listMyPixKeys } from "@/lib/withdrawals/queries";
 import { PIX_KEY_TYPE_LABEL } from "@/lib/withdrawals/pix-keys";
 import { serverEnv } from "@/lib/env";
+import { getSessionUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import { formatDateTimeBR } from "@/lib/utils";
 import {
   EmptyState,
@@ -21,6 +23,16 @@ export const metadata: Metadata = { title: "Chaves PIX" };
 export default async function ChavesPixPage() {
   const keys = await listMyPixKeys();
   const cooldownHours = serverEnv().WITHDRAWAL_PIX_KEY_COOLDOWN_HOURS;
+
+  const user = await getSessionUser();
+  const supabase = await createClient();
+  const { data: profile } = user
+    ? await supabase
+        .from("profiles")
+        .select("cpf_last3")
+        .eq("id", user.id)
+        .maybeSingle()
+    : { data: null };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -76,16 +88,18 @@ export default async function ChavesPixPage() {
 
         <SectionCard title="Adicionar chave PIX">
           <p className="mb-4 text-sm text-[#5B6B88]">
-            A chave é armazenada de forma segura e usada apenas para os seus
-            saques.
+            A chave é o seu CPF, guardada de forma cifrada e usada apenas para
+            os seus saques.
           </p>
-          <PixKeyForm />
+          <PixKeyForm cpfLast3={profile?.cpf_last3 ?? null} />
         </SectionCard>
       </div>
 
       <InfoBanner>
-        Por segurança, uma chave recém-cadastrada só fica liberada para saque
-        após {cooldownHours} horas. A chave fica guardada de forma cifrada.
+        Os saques só podem ser enviados para o CPF cadastrado na sua conta — por
+        isso a única chave aceita é a do tipo CPF. Uma chave recém-cadastrada só
+        fica liberada para saque após {cooldownHours} horas e fica guardada de
+        forma cifrada.
       </InfoBanner>
     </div>
   );
