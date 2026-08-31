@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
+import {
+  AlertTriangle,
+  CircleDollarSign,
+  Hourglass,
+  WalletCards,
+  HandCoins,
+} from "lucide-react";
 
 import { getSessionUser } from "@/lib/auth/session";
-import { formatBRL } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getMyWalletBalance } from "@/lib/ledger/queries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { DashboardHero } from "@/components/dashboard/dashboard-hero";
+import { MetricCard } from "@/components/dashboard/metric-card";
+import { GettingStartedCard } from "@/components/dashboard/getting-started-card";
+import { SecurityBanner } from "@/components/dashboard/security-banner";
 
 export const metadata: Metadata = { title: "Visão geral" };
 
@@ -17,24 +25,32 @@ export default async function PainelPage({
   const user = (await getSessionUser())!;
   const { erro } = await searchParams;
 
-  const stats = [
-    { label: "Total arrecadado", value: 0 },
-    { label: "Saldo pendente", value: 0 },
-    { label: "Saldo disponível", value: 0 },
-    { label: "Total sacado", value: 0 },
-  ];
+  // Valores reais da carteira do usuário (zerados enquanto não houver movimento).
+  const w = await getMyWalletBalance().catch(() => null);
+  const totalArrecadado = w
+    ? w.pending_cents +
+      w.available_cents +
+      w.reserved_cents +
+      w.held_cents +
+      w.withdrawn_cents
+    : 0;
+
+  const nome = user.displayName ?? user.fullName ?? "bem-vindo(a)";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">
-          Olá, {user.displayName ?? user.fullName ?? "bem-vindo(a)"}
-        </h1>
-        <p className="text-muted-foreground">
-          Este é o seu painel. As funções de campanha, doações e saque chegam nas
-          próximas fases.
-        </p>
-      </div>
+    <div className="space-y-6 sm:space-y-7">
+      <section className="relative">
+        <div className="relative z-10 max-w-xl">
+          <h1 className="text-[26px] font-bold leading-tight text-[#071D4A] sm:text-[34px] lg:text-[36px]">
+            Olá, {nome} 👋
+          </h1>
+          <p className="mt-2 text-[15px] text-[#586987] sm:text-base">
+            Este é o seu painel. As funções de campanha, doações e saque chegam
+            nas próximas fases.
+          </p>
+        </div>
+        <DashboardHero />
+      </section>
 
       {erro === "sem-permissao" && (
         <Alert variant="warning">
@@ -46,53 +62,35 @@ export default async function PainelPage({
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {s.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold tabular-nums">
-                {formatBRL(s.value)}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-4">
+        <MetricCard
+          label="Total arrecadado"
+          valueCents={totalArrecadado}
+          icon={CircleDollarSign}
+          tone="blue"
+        />
+        <MetricCard
+          label="Saldo pendente"
+          valueCents={w?.pending_cents ?? 0}
+          icon={Hourglass}
+          tone="green"
+        />
+        <MetricCard
+          label="Saldo disponível"
+          valueCents={w?.available_cents ?? 0}
+          icon={WalletCards}
+          tone="yellow"
+        />
+        <MetricCard
+          label="Total sacado"
+          valueCents={w?.withdrawn_cents ?? 0}
+          icon={HandCoins}
+          tone="purple"
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Comece agora</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>
-            <strong className="text-foreground">Crie a sua campanha:</strong>{" "}
-            monte um rascunho, adicione fotos e a sua história, e envie para
-            análise. Após a aprovação, é só compartilhar o link.
-          </p>
-          <p>
-            <strong className="text-foreground">Receba por PIX:</strong> as
-            doações entram automaticamente e você acompanha tudo pela Carteira.
-          </p>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Link
-              href="/painel/campanhas/nova"
-              className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-            >
-              Criar campanha
-            </Link>
-            <Link
-              href="/painel/seguranca"
-              className="rounded-md border px-3 py-1.5 text-xs font-medium"
-            >
-              Segurança da conta
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      <GettingStartedCard />
+      <SecurityBanner />
     </div>
   );
 }
