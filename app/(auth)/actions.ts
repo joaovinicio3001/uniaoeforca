@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv, hasServiceRole } from "@/lib/env";
 import { writeAuditLog } from "@/lib/security/audit";
 import { recordIpSignal } from "@/lib/risk/signals";
+import { recordLoginDevice } from "@/lib/security/devices";
 import { hashCPF, cpfLast3 } from "@/lib/security/crypto";
 import { rateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import {
@@ -213,6 +214,7 @@ export async function verifyEmailOtpAction(
     entityId: data.user.id,
   });
   await recordIpSignal(data.user.id);
+  await recordLoginDevice(data.user.id, data.session?.access_token);
 
   redirect("/painel");
 }
@@ -318,6 +320,7 @@ export async function loginAction(
     entityId: data.user.id,
   });
   await recordIpSignal(data.user.id);
+  await recordLoginDevice(data.user.id, data.session?.access_token);
 
   redirect(redirectTo);
 }
@@ -415,6 +418,7 @@ export async function resetWithCodeAction(
     entityId: data.user.id,
   });
   await recordIpSignal(data.user.id);
+  await recordLoginDevice(data.user.id, data.session?.access_token);
 
   redirect("/painel");
 }

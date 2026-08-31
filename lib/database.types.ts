@@ -993,6 +993,36 @@ export type Database = {
           },
         ]
       }
+      user_devices: {
+        Row: {
+          auth_session_id: string
+          created_at: string
+          id: string
+          ip: string | null
+          last_seen_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth_session_id: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          last_seen_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth_session_id?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          last_seen_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           granted_at: string
@@ -1547,6 +1577,19 @@ export type Database = {
         Returns: string
       }
       health_check: { Args: never; Returns: string }
+      sec_list_user_sessions: {
+        Args: { p_user_id: string }
+        Returns: {
+          session_id: string
+          created_at: string
+          refreshed_at: string | null
+          not_after: string | null
+        }[]
+      }
+      sec_revoke_user_session: {
+        Args: { p_user_id: string; p_session_id: string }
+        Returns: boolean
+      }
       anonymize_user: {
         Args: { p_actor: string; p_user_id: string }
         Returns: string
