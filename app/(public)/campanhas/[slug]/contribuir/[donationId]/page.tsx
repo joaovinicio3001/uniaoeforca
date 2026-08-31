@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { hasServiceRole } from "@/lib/env";
+import { hasServiceRole, publicEnv } from "@/lib/env";
 import {
   Card,
   CardContent,
@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PaymentView } from "./payment-view";
+import { ThankYou } from "./thank-you";
 
 export const metadata: Metadata = {
   title: "Pagamento PIX",
@@ -51,9 +52,13 @@ export default async function PaymentPage({
 
   const { data: payment } = await admin
     .from("payments")
-    .select("status, qr_code, qr_code_base64")
+    .select("status, qr_code, qr_code_base64, paid_at")
     .eq("donation_id", donationId)
     .maybeSingle();
+
+  const isPaid = donation.status === "paid" || payment?.status === "paid";
+  const base = publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "");
+  const campaignTitle = camp?.title ?? "esta campanha";
 
   return (
     <div className="container max-w-xl py-10">
@@ -65,12 +70,27 @@ export default async function PaymentPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Pague com PIX para apoiar {camp?.title}</CardTitle>
+          <CardTitle>
+            {isPaid
+              ? "Doação confirmada"
+              : `Pague com PIX para apoiar ${campaignTitle}`}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {payment?.qr_code ? (
+          {isPaid ? (
+            <ThankYou
+              slug={slug}
+              campaignTitle={campaignTitle}
+              amountCents={donation.gross_amount_cents}
+              donationId={donation.id}
+              paidAt={payment?.paid_at ?? null}
+              shareUrl={`${base}/campanhas/${slug}`}
+            />
+          ) : payment?.qr_code ? (
             <PaymentView
               slug={slug}
+              campaignTitle={campaignTitle}
+              shareUrl={`${base}/campanhas/${slug}`}
               donationId={donation.id}
               amountCents={donation.gross_amount_cents}
               qrCode={payment.qr_code}

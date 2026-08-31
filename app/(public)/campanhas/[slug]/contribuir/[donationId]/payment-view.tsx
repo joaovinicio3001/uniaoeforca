@@ -7,9 +7,12 @@ import { Check, Copy, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { formatBRL } from "@/lib/utils";
+import { ThankYou } from "./thank-you";
 
 type Props = {
   slug: string;
+  campaignTitle: string;
+  shareUrl: string;
   donationId: string;
   amountCents: number;
   qrCode: string;
@@ -21,6 +24,8 @@ const TERMINAL = ["paid", "failed", "expired", "refunded", "chargeback"];
 
 export function PaymentView({
   slug,
+  campaignTitle,
+  shareUrl,
   donationId,
   amountCents,
   qrCode,
@@ -83,19 +88,13 @@ export function PaymentView({
 
   if (status === "paid") {
     return (
-      <Alert variant="success">
-        <Check className="size-4" />
-        <AlertTitle>Pagamento confirmado!</AlertTitle>
-        <AlertDescription className="space-y-3">
-          <p>
-            Sua contribuição de <strong>{formatBRL(amountCents)}</strong> foi
-            registrada. Obrigado por apoiar.
-          </p>
-          <Button asChild size="sm">
-            <Link href={`/campanhas/${slug}`}>Voltar para a campanha</Link>
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <ThankYou
+        slug={slug}
+        campaignTitle={campaignTitle}
+        amountCents={amountCents}
+        donationId={donationId}
+        shareUrl={shareUrl}
+      />
     );
   }
 

@@ -282,3 +282,83 @@ export async function getMyCampaign(id: string): Promise<CampaignRow | null> {
     .maybeSingle();
   return data ?? null;
 }
+
+export type CampaignOrganizer = {
+  name: string;
+  verified: boolean;
+};
+
+/**
+ * Responsável pela campanha para exibição pública: primeiro nome (ou nome de
+ * exibição) e se a identidade dele já foi verificada (KYC aprovado).
+ */
+export async function getCampaignOrganizer(
+  ownerUserId: string,
+): Promise<CampaignOrganizer> {
+  if (!hasServiceRole()) return { name: "Responsável", verified: false };
+  const admin = createAdminClient();
+  const [{ data: profile }, { data: kyc }] = await Promise.all([
+    admin
+      .from("profiles")
+      .select("display_name, full_name")
+      .eq("id", ownerUserId)
+      .maybeSingle(),
+    admin
+      .from("kyc_cases")
+      .select("id")
+      .eq("user_id", ownerUserId)
+      .eq("status", "approved")
+      .limit(1),
+  ]);
+
+  const raw =
+    profile?.display_name?.trim() || profile?.full_name?.trim() || "Responsável";
+  // Mostra só o primeiro nome + inicial do sobrenome (privacidade).
+  const parts = raw.split(/\s+/).filter(Boolean);
+  const first = parts[0] ?? "Responsável";
+  const last = parts.length > 1 ? parts[parts.length - 1] : "";
+  const name = last ? `${first} ${last.charAt(0).toUpperCase()}.` : first;
+
+  return { name, verified: (kyc ?? []).length > 0 };
+}
+
+export type OwnerDonation = {
+  id: string;
+  donor: string;
+  anonymous: boolean;
+  message: string | null;
+  gross_amount_cents: number;
+  net_amount_cents: number;
+  status: string;
+  created_at: string;
+  paid_at: string | null;
+};
+
+/** Doações de uma campanha, para o dono (RLS: donations_select_campaign_owner). */
+export async function getCampaignDonations(
+  campaignId: string,
+  limit = 100,
+): Promise<OwnerDonation[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("donations")
+    .select(
+      "id, donor_name, anonymous, message, gross_amount_cents, net_amount_cents, status, created_at, paid_at",
+    )
+    .eq("campaign_id", campaignId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((d) => ({
+    id: d.id,
+    donor: d.anonymous
+      ? "Anônimo"
+      : d.donor_name?.trim() || "Apoiador",
+    anonymous: d.anonymous,
+    message: d.message?.trim() || null,
+    gross_amount_cents: d.gross_amount_cents,
+    net_amount_cents: d.net_amount_cents,
+    status: d.status,
+    created_at: d.created_at,
+    paid_at: d.paid_at,
+  }));
+}

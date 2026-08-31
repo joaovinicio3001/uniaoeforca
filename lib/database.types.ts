@@ -253,6 +253,7 @@ export type Database = {
           supporters_count: number
           title: string
           updated_at: string
+          view_count: number
           visibility: Database["public"]["Enums"]["campaign_visibility"]
         }
         Insert: {
@@ -276,6 +277,7 @@ export type Database = {
           supporters_count?: number
           title: string
           updated_at?: string
+          view_count?: number
           visibility?: Database["public"]["Enums"]["campaign_visibility"]
         }
         Update: {
@@ -299,6 +301,7 @@ export type Database = {
           supporters_count?: number
           title?: string
           updated_at?: string
+          view_count?: number
           visibility?: Database["public"]["Enums"]["campaign_visibility"]
         }
         Relationships: [
@@ -1648,6 +1651,10 @@ export type Database = {
           p_withdrawal_id: string
         }
         Returns: Json
+      }
+      increment_campaign_view: {
+        Args: { p_slug: string }
+        Returns: undefined
       }
       is_blocklisted: {
         Args: {

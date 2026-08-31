@@ -2,15 +2,24 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { MapPin, Users, HeartHandshake } from "lucide-react";
+import {
+  MapPin,
+  Users,
+  HeartHandshake,
+  BadgeCheck,
+  ShieldCheck,
+  Eye,
+} from "lucide-react";
 
 import {
   getCampaignBySlug,
   getCampaignMedia,
+  getCampaignOrganizer,
   getCampaignSupporters,
   getPublishedUpdates,
   progressPercent,
 } from "@/lib/campaigns/queries";
+import { createClient } from "@/lib/supabase/server";
 import { toPlainText } from "@/lib/campaigns/sanitize";
 import { PUBLIC_STATUSES } from "@/lib/campaigns/state-machine";
 import { formatBRL, formatDateTimeBR } from "@/lib/utils";
@@ -92,11 +101,20 @@ export default async function CampaignPage({
   // para quem não é dono/staff (o dono acessa pelo painel).
   if (!PUBLIC_STATUSES.includes(c.status)) notFound();
 
-  const [media, updates, supporters] = await Promise.all([
+  const [media, updates, supporters, organizer] = await Promise.all([
     getCampaignMedia(c.id),
     getPublishedUpdates(c.id),
     getCampaignSupporters(c.id, 30),
+    getCampaignOrganizer(c.owner_user_id),
   ]);
+
+  // Contador de visualizações — best-effort, não bloqueia a renderização.
+  try {
+    const sb = await createClient();
+    await sb.rpc("increment_campaign_view", { p_slug: c.slug });
+  } catch {
+    /* ignora */
+  }
   const cover = media.find((m) => m.id === c.cover_media_id) ?? media[0] ?? null;
   const gallery = media.filter((m) => m.id !== cover?.id);
   const pct = progressPercent(c);
@@ -175,14 +193,28 @@ export default async function CampaignPage({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Users className="size-4" /> {c.supporters_count} apoiadores
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              Por <strong className="font-medium text-foreground">{organizer.name}</strong>
+              {organizer.verified && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-1.5 py-0.5 text-xs font-medium text-success">
+                  <BadgeCheck className="size-3.5" /> Identidade verificada
+                </span>
+              )}
             </span>
             {(c.city || c.state) && (
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="size-4" />
                 {[c.city, c.state].filter(Boolean).join(" · ")}
+              </span>
+            )}
+            {c.view_count > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Eye className="size-4" /> {c.view_count.toLocaleString("pt-BR")}{" "}
+                visualizações
               </span>
             )}
           </div>
@@ -341,6 +373,27 @@ export default async function CampaignPage({
               url={`${publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "")}/campanhas/${c.slug}`}
               title={c.title}
             />
+          </div>
+
+          <div className="mt-4 rounded-xl border bg-card p-5 text-sm">
+            <p className="flex items-center gap-2 font-semibold text-foreground">
+              <ShieldCheck className="size-4 text-success" /> Doação protegida
+            </p>
+            <ul className="mt-2 space-y-1.5 text-muted-foreground">
+              <li>O pagamento é confirmado pelo provedor de PIX, nunca pelo navegador.</li>
+              <li>
+                {organizer.verified
+                  ? "A identidade do responsável foi verificada pela nossa equipe."
+                  : "O responsável passa por verificação de identidade antes de sacar."}
+              </li>
+              <li>Toda campanha é revisada antes de ficar pública e pode ser denunciada.</li>
+            </ul>
+            <Link
+              href="/regras-e-seguranca"
+              className="mt-2 inline-block font-medium text-primary hover:underline"
+            >
+              Como o dinheiro é protegido
+            </Link>
           </div>
         </aside>
       </div>
